@@ -1,5 +1,5 @@
 import numpy as np
-from AI.MazeRunner.node import Node
+from AI.MazeRunner.utils.node import Node
 
 
 class Graph():
