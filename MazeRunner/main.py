@@ -1,7 +1,7 @@
-from graph import Graph
-from environment import Environment
-from dfs import DFS
-from bfs import BFS
+from AI.MazeRunner.graph import Graph
+from AI.MazeRunner.environment import Environment
+from AI.MazeRunner.dfs import DFS
+from AI.MazeRunner.bfs import BFS
 
 
 class MazeRunner():
