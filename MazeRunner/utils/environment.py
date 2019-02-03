@@ -18,8 +18,6 @@ class Environment():
         self.p = p
 
         self.maze = np.array([list(np.random.binomial(1, 1 - p, n)) for _ in range(n)])
-        self.maze[0, 0] = 1
-        self.maze[n-1, n-1] = 1
 
         # Create a copy of maze to render and update
         self.maze_copy = self.maze.copy()

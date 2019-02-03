@@ -1,13 +1,9 @@
 from AI.MazeRunner.utils.graph import Graph
 from AI.MazeRunner.utils.environment import Environment
-from AI.MazeRunner.algorithms.dfs import DFS
-from AI.MazeRunner.algorithms.bfs import BFS
+from AI.MazeRunner.algorithms.path_finding_algorithms import PathFinderAlgorithm
 
 
 class MazeRunner():
-    DfsString = "dfs"
-    BfsString = "bfs"
-    AStarString = "Astar"
 
     def __init__(self, algorithm):
         self.algorithm = algorithm
@@ -21,11 +17,9 @@ class MazeRunner():
         graph = Graph(environment = env)
         graph.create_graph_from_maze()
 
-        # Run the algorithm on the graph
-        if self.algorithm == self.DfsString:
-            path_finder = DFS(graph = graph)
-        elif self.algorithm == self.BfsString:
-            path_finder = BFS(graph = graph)
+        # Run the path finding algorithm
+        path_finder = PathFinderAlgorithm(graph = graph, algorithm = self.algorithm)
+        path_finder.run_path_finder_algorithm()
 
 if __name__ == "__main__":
     maze_runner = MazeRunner(algorithm = "dfs")

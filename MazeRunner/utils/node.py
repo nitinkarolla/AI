@@ -20,3 +20,6 @@ class Node():
         self.post_visit = post_visit
         self.distance_from_root = distance_from_root
         self.num_nodes_before_this_node = num_nodes_before_this_node
+
+    def get_children(self, node):
+        return
