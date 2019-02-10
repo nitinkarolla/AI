@@ -1,29 +1,38 @@
 class Node():
     def __init__(self,
                  value = None,
-                 previous = None,
+                 row = None,
+                 column = None,
                  left = None,
                  right = None,
                  up = None,
                  down = None,
-                 pre_visit = None,
-                 post_visit = None,
+                 parent = None,
                  distance_from_root = None,
+                 previsit = None,
+                 postvisit = None,
                  num_nodes_before_this_node = None):
         self.value = value
-        self.previous = previous
+        self.row = row
+        self.column = column
+        self.parent = parent
         self.left = left
         self.right = right
         self.up = up
         self.down = down
-        self.pre_visit = pre_visit
-        self.post_visit = post_visit
         self.distance_from_root = distance_from_root
+        self.previsit = previsit
+        self.postvisit = postvisit
         self.num_nodes_before_this_node = num_nodes_before_this_node
 
+    def __str__(self):
+        return str(self.__dict__)
+
+    def __eq__(self, other):
+        return self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return self.__dict__ != other.__dict__
+
     def get_children(self, node):
-        children = [node.up, node.down, node.left, node.right]
-        for child in children:
-            if child is None:
-                children.remove(child)
-        return children
+        return [node.up, node.left, node.down, node.right]

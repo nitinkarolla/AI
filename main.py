@@ -11,8 +11,7 @@ class MazeRunner():
     def run(self):
         # Create the maze
         env = Environment()
-        env.generate_maze(n = 16, p = 0.3)
-        s
+        env.generate_maze(n = 20, p = 0.4)
 
         # Generate graph from the maze
         graph = Graph(environment = env)

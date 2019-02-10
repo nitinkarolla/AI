@@ -12,7 +12,7 @@ class Graph():
             for column in range(len(self.environment.maze)):
                 if self.environment.maze[row, column] == 0:
                     continue
-                self.graph_maze[row, column] = Node(value = self.environment.maze[row, column])
+                self.graph_maze[row, column] = Node(value = self.environment.maze[row, column], row = row, column = column)
 
         # Left
         for row in range(len(self.environment.maze)):
