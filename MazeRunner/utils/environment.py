@@ -45,7 +45,7 @@ class Environment():
         plt.yticks([])
         plt.ion()
         plt.show()
-        plt.pause(0.000000002)
+        plt.pause(0.0000000001)
 
     def update_color_of_cell(self, row, column):
         self.maze_copy[row, column] = -1

@@ -24,37 +24,36 @@ class PathFinderAlgorithm():
 
         self.fringe = [root]
         self.path = []
-        try:
-            while self.fringe:
-                node = self.fringe.pop()
+        while self.fringe:
+            node = self.fringe.pop()
 
-                # update color of the cell and render the maze
-                self.graph.environment.update_color_of_cell(node.row, node.column)
-                self.graph.environment.render_maze()
+            # update color of the cell and render the maze
+            self.graph.environment.update_color_of_cell(node.row, node.column)
+            self.graph.environment.render_maze()
 
-                if (node == dest):
-                    exit()
+            if (node == dest):
+                exit()
 
-                if node not in self.path:
-                    self.path.append(node)
+            if node not in self.path:
+                self.path.append(node)
 
-                flag = True
-                while(flag):
-                    node_children = node.get_children(node = node)
-                    unvisited_children = self._get_unvisited_children(node_children)
+            flag = True
+            while(flag):
+                node_children = node.get_children(node = node)
+                unvisited_children = self._get_unvisited_children(node_children)
 
-                    if len(unvisited_children) == 0:
-                        self.graph.environment.reset_color_of_cell(node.row, node.column)
-                        self.graph.environment.render_maze()
-                    else:
-                        for child in unvisited_children:
-                            child.parent = node
-                            self.fringe.append(child)
-                        flag = False
+                if len(unvisited_children) == 0:
+                    self.graph.environment.reset_color_of_cell(node.row, node.column)
+                    self.graph.environment.render_maze()
+                else:
+                    for child in unvisited_children:
+                        child.parent = node
+                        self.fringe.append(child)
+                    flag = False
 
-                    node = node.parent
-        except Exception:
-            self.graph.environment.display_maze()
+                node = node.parent
+                if node is None:
+                    flag = False
 
     def _run_bfs(self):
         return
