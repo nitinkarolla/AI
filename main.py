@@ -1,6 +1,6 @@
-from AI.MazeRunner.utils.graph import Graph
-from AI.MazeRunner.utils.environment import Environment
-from AI.MazeRunner.algorithms.path_finding_algorithms import PathFinderAlgorithm
+from MazeRunner.utils.graph import Graph
+from MazeRunner.utils.environment import Environment
+from MazeRunner.algorithms.path_finding_algorithms import PathFinderAlgorithm
 
 
 class MazeRunner():
@@ -12,6 +12,7 @@ class MazeRunner():
         # Create the maze
         env = Environment()
         env.generate_maze(n = 16, p = 0.3)
+        s
 
         # Generate graph from the maze
         graph = Graph(environment = env)

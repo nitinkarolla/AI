@@ -11,6 +11,8 @@ class Environment():
     def __init__(self):
         self.maze = None
         self.maze_copy = None
+
+        # The default colormap of our maze - 0: Black, 1: White
         self.cmap = colors.ListedColormap(['black', 'white'])
 
     def generate_maze(self, n = DimensionOfMaze, p = ProbabilityOfBlockedMaze):

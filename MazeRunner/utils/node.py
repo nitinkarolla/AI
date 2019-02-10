@@ -22,4 +22,8 @@ class Node():
         self.num_nodes_before_this_node = num_nodes_before_this_node
 
     def get_children(self, node):
-        return
+        children = [node.up, node.down, node.left, node.right]
+        for child in children:
+            if child is None:
+                children.remove(child)
+        return children
