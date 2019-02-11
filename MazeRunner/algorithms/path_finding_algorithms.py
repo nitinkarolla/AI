@@ -43,7 +43,7 @@ class PathFinderAlgorithm():
             # the color of all parent cells along the path who have no other children to explore.
             flag = True
             while(flag):
-                node_children = node.get_children(node = node)
+                node_children = node.get_children(node = node, algorithm = self.algorithm)
                 unvisited_children = self._get_unvisited_children(node_children)
 
                 # If no unvisited children found, then reset the color of this cell in the current path.
@@ -71,7 +71,7 @@ class PathFinderAlgorithm():
             temp_path = []
             node = self.fringe.pop(0)
 
-            node_children = node.get_children(node = node)
+            node_children = node.get_children(node = node, algorithm = self.algorithm)
             unvisited_children = self._get_unvisited_children(node_children)
 
             for child in unvisited_children:

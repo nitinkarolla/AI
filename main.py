@@ -11,7 +11,7 @@ class MazeRunner():
     def run(self):
         # Create the maze
         env = Environment()
-        env.generate_maze(n = 10, p = 0.2)
+        env.generate_maze(n = 25, p = 0.3)
 
         # Generate graph from the maze
         graph = Graph(environment = env)
@@ -22,5 +22,5 @@ class MazeRunner():
         path_finder.run_path_finder_algorithm()
 
 if __name__ == "__main__":
-    maze_runner = MazeRunner(algorithm = "bfs")
+    maze_runner = MazeRunner(algorithm = "dfs")
     maze_runner.run()

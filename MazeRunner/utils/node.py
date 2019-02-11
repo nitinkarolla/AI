@@ -30,5 +30,8 @@ class Node():
     def __ne__(self, other):
         return self.__dict__ != other.__dict__
 
-    def get_children(self, node):
-        return [node.up, node.right, node.left, node.down]
+    def get_children(self, node, algorithm):
+        if algorithm == 'dfs':
+            return [node.left, node.down, node.up, node.right]
+        else:
+            return [node.up, node.right, node.left, node.down]
