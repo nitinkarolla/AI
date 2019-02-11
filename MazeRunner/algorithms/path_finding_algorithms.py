@@ -46,6 +46,7 @@ class PathFinderAlgorithm():
                 node_children = node.get_children(node = node)
                 unvisited_children = self._get_unvisited_children(node_children)
 
+                # If no unvisited children found, then reset the color of this cell in the current path.
                 if len(unvisited_children) == 0:
                     self.graph.environment.reset_color_of_cell(node.row, node.column)
                     self.graph.environment.render_maze()
@@ -78,6 +79,7 @@ class PathFinderAlgorithm():
                 self.fringe.append(child)
                 self.path.append(child)
 
+            # Get the path through which you reach this node from the root node
             flag = True
             temp_node = node
             while(flag):
@@ -87,10 +89,9 @@ class PathFinderAlgorithm():
                     flag = False
             temp_path_copy = temp_path.copy()
 
-
+            # Update the color of the path which we found above
             while(len(temp_path) != 0):
                 temp_node = temp_path.pop()
-
                 self.graph.environment.update_color_of_cell(temp_node.row, temp_node.column)
                 self.graph.environment.render_maze()
 
@@ -98,9 +99,9 @@ class PathFinderAlgorithm():
             if (node == dest):
                 break
 
+            # We reset the path again to render a new path in the next iteration.
             while (len(temp_path_copy) != 0):
                 temp_node = temp_path_copy.pop(0)
-
                 self.graph.environment.reset_color_of_cell(temp_node.row, temp_node.column)
                 self.graph.environment.render_maze()
 
