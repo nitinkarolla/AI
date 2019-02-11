@@ -6,6 +6,7 @@ class PathFinderAlgorithm():
     def __init__(self, graph = None, algorithm = None):
         self.graph = graph
         self.algorithm = algorithm
+        self.path = []
 
     def _get_unvisited_children(self, node_children):
         unvisited_children = []
@@ -23,7 +24,7 @@ class PathFinderAlgorithm():
         dest = self.graph.graph_maze[self.graph.environment.n - 1, self.graph.environment.n - 1]
 
         self.fringe = [root]
-        self.path = []
+        self.path = [root]
         while self.fringe:
             node = self.fringe.pop()
 
@@ -31,12 +32,15 @@ class PathFinderAlgorithm():
             self.graph.environment.update_color_of_cell(node.row, node.column)
             self.graph.environment.render_maze()
 
+            # if you reach the destination, then break
             if (node == dest):
-                exit()
+                break
 
             if node not in self.path:
                 self.path.append(node)
 
+            # If there is no further path, then reset the color of the cell. Also, subsequently reset
+            # the color of all parent cells along the path who have no other children to explore.
             flag = True
             while(flag):
                 node_children = node.get_children(node = node)
@@ -56,7 +60,49 @@ class PathFinderAlgorithm():
                     flag = False
 
     def _run_bfs(self):
-        return
+
+        root = self.graph.graph_maze[0, 0]
+        dest = self.graph.graph_maze[self.graph.environment.n - 1, self.graph.environment.n - 1]
+
+        self.fringe = [root]
+        self.path = [root]
+        while self.fringe:
+            temp_path = []
+            node = self.fringe.pop(0)
+
+            node_children = node.get_children(node = node)
+            unvisited_children = self._get_unvisited_children(node_children)
+
+            for child in unvisited_children:
+                child.parent = node
+                self.fringe.append(child)
+                self.path.append(child)
+
+            flag = True
+            temp_node = node
+            while(flag):
+                temp_path.append(temp_node)
+                temp_node = temp_node.parent
+                if temp_node is None:
+                    flag = False
+            temp_path_copy = temp_path.copy()
+
+
+            while(len(temp_path) != 0):
+                temp_node = temp_path.pop()
+
+                self.graph.environment.update_color_of_cell(temp_node.row, temp_node.column)
+                self.graph.environment.render_maze()
+
+            # if you reach the destination, then break
+            if (node == dest):
+                break
+
+            while (len(temp_path_copy) != 0):
+                temp_node = temp_path_copy.pop(0)
+
+                self.graph.environment.reset_color_of_cell(temp_node.row, temp_node.column)
+                self.graph.environment.render_maze()
 
     def _run_a_star(self):
         return
@@ -68,3 +114,6 @@ class PathFinderAlgorithm():
             self._run_bfs()
         else:
             self._run_a_star()
+
+        # Display the final highlighted path
+        self.graph.environment.render_maze(timer = 10)
