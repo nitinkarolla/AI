@@ -9,6 +9,7 @@ class Node():
                  down = None,
                  parent = None,
                  distance_from_root = None,
+                 distance_from_source = None,
                  num_nodes_before_this_node = None):
         self.value = value
         self.row = row
@@ -19,6 +20,7 @@ class Node():
         self.up = up
         self.down = down
         self.distance_from_root = distance_from_root
+        self.distance_from_source = distance_from_source
         self.num_nodes_before_this_node = num_nodes_before_this_node
 
     def __str__(self):
