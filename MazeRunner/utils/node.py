@@ -34,6 +34,6 @@ class Node():
 
     def get_children(self, node, algorithm):
         if algorithm == 'dfs':
-            return [node.left, node.down, node.up, node.right]
+            return [node.left, node.up, node.down, node.right]
         else:
-            return [node.up, node.right, node.left, node.down]
+            return [node.right, node.down, node.up, node.left]

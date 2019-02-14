@@ -4,7 +4,7 @@ import heapq
 class PathFinderAlgorithm():
     DfsString = "dfs"
     BfsString = "bfs"
-    AStarString = "Astar"
+    AStarString = "astar"
 
     def __init__(self, graph = None, algorithm = None):
         self.graph = graph
@@ -109,7 +109,7 @@ class PathFinderAlgorithm():
                 self.graph.environment.reset_color_of_cell(temp_node.row, temp_node.column)
                 self.graph.environment.render_maze()
 
-    def _run_a_star(self):
+    def _run_astar(self):
 
         root = self.graph.graph_maze[0, 0]
         dest = self.graph.graph_maze[self.graph.environment.n - 1, self.graph.environment.n - 1]
@@ -160,7 +160,7 @@ class PathFinderAlgorithm():
         elif self.algorithm == self.BfsString:
             self._run_bfs()
         else:
-            self._run_a_star()
+            self._run_astar()
 
         # Display the final highlighted path
         self.graph.environment.render_maze(timer = 10)
