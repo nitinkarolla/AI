@@ -9,6 +9,7 @@ class PathFinderAlgorithm():
     def __init__(self, graph = None, algorithm = None):
         self.graph = graph
         self.algorithm = algorithm
+        self.visited = []
         self.path = []
 
     def _get_unvisited_children(self, node_children):
@@ -17,9 +18,15 @@ class PathFinderAlgorithm():
             if child is None:
                 continue
 
-            if child not in self.path:
+            if child not in self.visited:
                 unvisited_children.append(child)
         return unvisited_children
+
+    def _get_final_path(self):
+        node = self.graph.graph_maze[self.graph.environment.n - 1, self.graph.environment.n - 1]
+        while node is not None:
+            self.visited.append((node.row, node.column))
+            node = node.parent
 
     def _run_dfs(self):
 
@@ -27,7 +34,7 @@ class PathFinderAlgorithm():
         dest = self.graph.graph_maze[self.graph.environment.n - 1, self.graph.environment.n - 1]
 
         self.fringe = [root]
-        self.path.append(root)
+        self.visited.append(root)
         while self.fringe:
             node = self.fringe.pop()
 
@@ -39,8 +46,8 @@ class PathFinderAlgorithm():
             if (node == dest):
                 break
 
-            if node not in self.path:
-                self.path.append(node)
+            if node not in self.visited:
+                self.visited.append(node)
 
             # If there is no further path, then reset the color of the cell. Also, subsequently reset
             # the color of all parent cells along the path who have no other children to explore.
@@ -70,7 +77,7 @@ class PathFinderAlgorithm():
         dest = self.graph.graph_maze[self.graph.environment.n - 1, self.graph.environment.n - 1]
 
         self.fringe = [root]
-        self.path.append(root)
+        self.visited.append(root)
         while self.fringe:
             temp_path = []
             node = self.fringe.pop(0)
@@ -81,7 +88,7 @@ class PathFinderAlgorithm():
             for child in unvisited_children:
                 child.parent = node
                 self.fringe.append(child)
-                self.path.append(child)
+                self.visited.append(child)
 
             # Get the path through which you reach this node from the root node
             flag = True
@@ -115,7 +122,7 @@ class PathFinderAlgorithm():
         dest = self.graph.graph_maze[self.graph.environment.n - 1, self.graph.environment.n - 1]
 
         self.fringe = [root]
-        self.path.append(root)
+        self.visited.append(root)
         while self.fringe:
             temp_path = []
             node = self.fringe.pop(0)
@@ -126,7 +133,7 @@ class PathFinderAlgorithm():
             for child in unvisited_children:
                 child.parent = node
                 self.fringe.append(child)
-                self.path.append(child)
+                self.visited.append(child)
 
             # Get the path through which you reach this node from the root node
             flag = True
@@ -161,6 +168,9 @@ class PathFinderAlgorithm():
             self._run_bfs()
         else:
             self._run_astar()
+
+        # Get the final path
+        self._get_final_path()
 
         # Display the final highlighted path
         self.graph.environment.render_maze(timer = 10)
