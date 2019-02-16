@@ -218,5 +218,8 @@ class PathFinderAlgorithm():
         # Get the final path
         self._get_final_path()
 
+        # Reverse the final saved path
+        self.path = self.path[::-1]
+        print(self.path)
         # Display the final highlighted path
         self.graph.environment.render_maze(timer = 10)
