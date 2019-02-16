@@ -119,8 +119,9 @@ class PathFinderAlgorithm():
             # Update the color of the path which we found above by popping the root first and the subsequent nodes.
             while (len(temp_path) != 0):
                 temp_node = temp_path.pop()
-                self.graph.environment.update_color_of_cell(temp_node.row, temp_node.column)
-                self.graph.environment.render_maze()
+                if self.visual == True:         #Visualisation Parameter added
+                    self.graph.environment.update_color_of_cell(temp_node.row, temp_node.column)
+                    self.graph.environment.render_maze()
 
             # if you reach the destination, then break
             if (node == dest):
@@ -129,8 +130,9 @@ class PathFinderAlgorithm():
             # We reset the entire path again to render a new path in the next iteration.
             while (len(temp_path_copy) != 0):
                 temp_node = temp_path_copy.pop(0)
-                self.graph.environment.reset_color_of_cell(temp_node.row, temp_node.column)
-                self.graph.environment.render_maze()
+                if self.visual == True:        #Visualisation Parameter added
+                    self.graph.environment.reset_color_of_cell(temp_node.row, temp_node.column)
+                    self.graph.environment.render_maze()
 
 
     def _run_astar(self, heuristic = "edit"):
@@ -225,4 +227,5 @@ class PathFinderAlgorithm():
         self.path = self.path[::-1]
         print(self.path)
         # Display the final highlighted path
-        self.graph.environment.render_maze(timer = 10)
+        if self.visual == True:
+            self.graph.environment.render_maze(timer = 10)
