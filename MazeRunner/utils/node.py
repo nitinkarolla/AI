@@ -35,11 +35,13 @@ class Node():
     def __ne__(self, other):
         return self.__dict__ != other.__dict__
 
-    def cmp(self, a, b):
-        return (a > b) - (a < b)
+    # def cmp(self, a, b):
+    #     return (a > b) - (a < b)
 
-    def __cmp__(self, other):
-        return self.cmp(self.distance_from_dest + self.distance_from_source, other.distance_from_dest + other.distance_from_source)
+    def __lt__(self, other):
+        selfPriority = self.distance_from_source + self.distance_from_dest
+        otherPriority = other.distance_from_source + other.distance_from_dest
+        return selfPriority < otherPriority
 
     def get_heuristic(self):
         return (self.distance_from_source + self.distance_from_dest)
