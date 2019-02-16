@@ -23,7 +23,7 @@ class PathFinderAlgorithm():
             if self.algorithm == "astar":
                 unvisited_children.append(child)
             else:
-                if child in self.visited:
+                if child not in self.visited:
                     unvisited_children.append(child)
         return unvisited_children
 
