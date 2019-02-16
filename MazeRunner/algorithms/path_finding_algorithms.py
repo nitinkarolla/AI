@@ -8,9 +8,10 @@ class PathFinderAlgorithm():
     BfsString = "bfs"
     AStarString = "astar"
 
-    def __init__(self, graph = None, algorithm = None):
+    def __init__(self, graph = None, algorithm = None, visual = False):
         self.graph = graph
         self.algorithm = algorithm
+        self.visual = visual
         self.visited = []
         self.path = []
 
@@ -47,8 +48,9 @@ class PathFinderAlgorithm():
             node = self.fringe.pop()
 
             # update color of the cell and render the maze
-            self.graph.environment.update_color_of_cell(node.row, node.column)
-            self.graph.environment.render_maze()
+            if self.visual == True :            #Added visualisation parameter
+                self.graph.environment.update_color_of_cell(node.row, node.column)
+                self.graph.environment.render_maze()
 
             # if you reach the destination, then break
             if (node == dest):
@@ -67,8 +69,9 @@ class PathFinderAlgorithm():
                 # If no unvisited children found, then reset the color of this cell in the current path
                 # because there is no further path from this cell.
                 if len(unvisited_children) == 0:
-                    self.graph.environment.reset_color_of_cell(node.row, node.column)
-                    self.graph.environment.render_maze()
+                    if self.visual == True:         #Added visualisation parameter --Nitin & Vedant
+                        self.graph.environment.reset_color_of_cell(node.row, node.column)
+                        self.graph.environment.render_maze()
                 else:
                     for child in unvisited_children:
                         child.parent = node
