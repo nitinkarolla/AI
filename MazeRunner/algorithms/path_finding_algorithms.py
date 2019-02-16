@@ -1,5 +1,6 @@
 import heapq
 import numpy as np
+import queue as Q
 
 
 class PathFinderAlgorithm():
@@ -19,8 +20,11 @@ class PathFinderAlgorithm():
             if child is None:
                 continue
 
-            if child not in self.visited:
+            if self.algorithm == "astar":
                 unvisited_children.append(child)
+            else:
+                if child in self.visited:
+                    unvisited_children.append(child)
         return unvisited_children
 
     def _get_final_path(self):
@@ -28,6 +32,12 @@ class PathFinderAlgorithm():
         while node is not None:
             self.visited.append((node.row, node.column))
             node = node.parent
+
+    def _get_edit_distance(self, node, dest):
+        return np.sqrt((node.row - dest.row)**2 + (node.column - dest.column)**2)
+
+    def _get_manhattan_distance(self, node, dest):
+        return
 
     def _run_dfs(self):
 
@@ -99,7 +109,7 @@ class PathFinderAlgorithm():
             # Get the path through which you reach this node from the root node
             flag = True
             temp_node = node
-            while(flag):
+            while (flag):
                 temp_path.append(temp_node)
                 temp_node = temp_node.parent
                 if temp_node is None:
@@ -107,7 +117,7 @@ class PathFinderAlgorithm():
             temp_path_copy = temp_path.copy()
 
             # Update the color of the path which we found above by popping the root first and the subsequent nodes.
-            while(len(temp_path) != 0):
+            while (len(temp_path) != 0):
                 temp_node = temp_path.pop()
                 self.graph.environment.update_color_of_cell(temp_node.row, temp_node.column)
                 self.graph.environment.render_maze()
@@ -122,32 +132,47 @@ class PathFinderAlgorithm():
                 self.graph.environment.reset_color_of_cell(temp_node.row, temp_node.column)
                 self.graph.environment.render_maze()
 
-    def _get_edit_distance(self, node, dest):
-        return np.sqrt((node.row - dest.row)**2 + (node.column - dest.column)**2)
-
-    def _get_manhattan_distance(self, node, dest):
-        return
 
     def _run_astar(self, heuristic = "edit"):
 
         root = self.graph.graph_maze[0, 0]
         dest = self.graph.graph_maze[self.graph.environment.n - 1, self.graph.environment.n - 1]
 
-        root.distance_from_dest = self._get_edit_distance(root, dest)
+        # Assign distance from each node to the destination
+        for row in range(len(self.graph.environment.maze)):
+            for column in range(len(self.graph.environment.maze)):
+                if self.graph.environment.maze[row, column] == 0 or (row == 0 and column == 0):
+                    continue
+                if heuristic == "edit":
+                    self.graph.graph_maze[row, column].distance_from_dest = self._get_edit_distance(
+                        self.graph.graph_maze[row, column], dest)
+                else:
+                    self.graph.graph_maze[row, column].distance_from_dest = self._get_manhattan_distance(
+                        self.graph.graph_maze[row, column], dest)
 
-        self.fringe = [root]
+
+        root.distance_from_source = 0
+
+        self.fringe = Q.PriorityQueue()
+        self.fringe.put(root)
+
         self.visited.append(root)
         while self.fringe:
             temp_path = []
-            node = self.fringe.pop(0)
+            node = self.fringe.get()
 
-            node_children = node.get_children(node = node, algorithm = self.algorithm)
+            if node not in self.visited:
+                self.visited.append(node)
+
+            node_children = node.get_children(node=node, algorithm=self.algorithm)
             unvisited_children = self._get_unvisited_children(node_children)
 
             for child in unvisited_children:
                 child.parent = node
-                self.fringe.append(child)
-                self.visited.append(child)
+
+                # If child has been added to the fringe by some previous node, then dont add it again.
+                if child not in self.fringe:
+                    self.fringe.put(child)
 
             # Get the path through which you reach this node from the root node
             flag = True

@@ -1,3 +1,6 @@
+import numpy as np
+
+
 class Node():
     def __init__(self,
                  value = None,
@@ -9,7 +12,7 @@ class Node():
                  down = None,
                  parent = None,
                  distance_from_dest = None,
-                 distance_from_source = None,
+                 distance_from_source = np.inf,
                  num_nodes_before_this_node = None):
         self.value = value
         self.row = row
@@ -31,6 +34,15 @@ class Node():
 
     def __ne__(self, other):
         return self.__dict__ != other.__dict__
+
+    def cmp(self, a, b):
+        return (a > b) - (a < b)
+
+    def __cmp__(self, other):
+        return self.cmp(self.distance_from_dest + self.distance_from_source, other.distance_from_dest + other.distance_from_source)
+
+    def get_heuristic(self):
+        return (self.distance_from_source + self.distance_from_dest)
 
     def get_children(self, node, algorithm):
         if algorithm == 'dfs':
