@@ -8,7 +8,7 @@ class Node():
                  up = None,
                  down = None,
                  parent = None,
-                 distance_from_root = None,
+                 distance_from_dest = None,
                  distance_from_source = None,
                  num_nodes_before_this_node = None):
         self.value = value
@@ -19,7 +19,7 @@ class Node():
         self.right = right
         self.up = up
         self.down = down
-        self.distance_from_root = distance_from_root
+        self.distance_from_dest = distance_from_dest
         self.distance_from_source = distance_from_source
         self.num_nodes_before_this_node = num_nodes_before_this_node
 

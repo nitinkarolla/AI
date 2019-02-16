@@ -1,4 +1,5 @@
 import heapq
+import numpy as np
 
 
 class PathFinderAlgorithm():
@@ -82,13 +83,18 @@ class PathFinderAlgorithm():
             temp_path = []
             node = self.fringe.pop(0)
 
+            if node not in self.visited:
+                self.visited.append(node)
+
             node_children = node.get_children(node = node, algorithm = self.algorithm)
             unvisited_children = self._get_unvisited_children(node_children)
 
             for child in unvisited_children:
                 child.parent = node
-                self.fringe.append(child)
-                self.visited.append(child)
+
+                # If child has been added to the fringe by some previous node, then dont add it again.
+                if child not in self.fringe:
+                    self.fringe.append(child)
 
             # Get the path through which you reach this node from the root node
             flag = True
@@ -116,10 +122,18 @@ class PathFinderAlgorithm():
                 self.graph.environment.reset_color_of_cell(temp_node.row, temp_node.column)
                 self.graph.environment.render_maze()
 
-    def _run_astar(self):
+    def _get_edit_distance(self, node, dest):
+        return np.sqrt((node.row - dest.row)**2 + (node.column - dest.column)**2)
+
+    def _get_manhattan_distance(self, node, dest):
+        return
+
+    def _run_astar(self, heuristic = "edit"):
 
         root = self.graph.graph_maze[0, 0]
         dest = self.graph.graph_maze[self.graph.environment.n - 1, self.graph.environment.n - 1]
+
+        root.distance_from_dest = self._get_edit_distance(root, dest)
 
         self.fringe = [root]
         self.visited.append(root)
@@ -127,7 +141,7 @@ class PathFinderAlgorithm():
             temp_path = []
             node = self.fringe.pop(0)
 
-            node_children = node.get_children(node=node, algorithm=self.algorithm)
+            node_children = node.get_children(node = node, algorithm = self.algorithm)
             unvisited_children = self._get_unvisited_children(node_children)
 
             for child in unvisited_children:
