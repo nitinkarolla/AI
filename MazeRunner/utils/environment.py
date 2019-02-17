@@ -26,7 +26,7 @@ class Environment():
         self.maze[n-1, n-1] = 4
 
         # Create a copy of maze to render and update
-        self.maze_copy = self.maze
+        self.maze_copy = self.maze.copy()
 
     def render_maze(self, timer = 1e-10):
         # Create a mask for the particular cell and change its color to green
@@ -62,14 +62,17 @@ class Environment():
 
     def reset_environment(self):
         self.maze = self.prev_maze
-        self.maze_copy = self.maze
+        self.maze_copy = self.maze.copy()
 
     def modify_environment(self):
 
         self.prev_maze = self.maze.copy()
-        random_row = np.random.choice(range(1, self.n - 1))
-        random_column = np.random.choice(range(1, self.n - 1))
-
+        random_row = np.random.choice(range(0, self.n - 1))
+        random_column = np.random.choice(range(0, self.n - 1))
+        
+        if random_row == 0 and random_column == 0:
+            random_row = 1
+            
         # If the cell's value is 1 change it to 0 and vice-versa
         if self.maze[random_row, random_column] == 0:
             self.maze[random_row, random_column] = 1
@@ -78,5 +81,5 @@ class Environment():
             self.maze[random_row, random_column] = 0
 
         # Update copy of maze
-        self.maze_copy = self.maze
+        self.maze_copy = self.maze.copy()
 
