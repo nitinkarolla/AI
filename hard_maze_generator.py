@@ -1,23 +1,31 @@
-import numpy as np
+import argparse
+import sys
 from main import MazeRunner
 
 
 class HardMazeGenerator():
 
-    def __init__(self, n = 5, p = 0.2, algorithm = 'dfs', metric = "path", heuristic = None, max_iterations = 100, load_maze = None):
-        self.n = n
-        self.p = p
+    def __init__(self,
+                 maze_dimension = 5,
+                 probability_of_obstacles = 0.2,
+                 algorithm = 'dfs',
+                 metric = "path",
+                 heuristic = None,
+                 max_iterations = 100,
+                 visual = None):
+        self.maze_dimension = maze_dimension
+        self.probability_of_obstacles = probability_of_obstacles
         self.algorithm = algorithm
         self.metric = metric
-        self.load_maze = load_maze
+        self.visual = visual
         self.heuristic = heuristic
         self.max_iterations = max_iterations
 
     def _run(self):
-        maze_runner = MazeRunner(maze_dimension = self.n, 
-                                 probability_of_obstacles = self.p,
+        maze_runner = MazeRunner(maze_dimension = self.maze_dimension,
+                                 probability_of_obstacles = self.probability_of_obstacles,
                                  algorithm = self.algorithm,
-                                 visual = True,
+                                 visual = self.visual,
                                  heuristic = self.heuristic)
 
 
@@ -72,7 +80,23 @@ class HardMazeGenerator():
             iteration_count = iteration_count + 1
          
 if __name__ == "__main__":
-    hard_maze = HardMazeGenerator()
+    parser = argparse.ArgumentParser(description = 'generate hard mazes')
+    parser.add_argument("-n", "--maze_dimension", default = 10)
+    parser.add_argument("-p", "--probability_of_obstacles", default = 0.2)
+    parser.add_argument('-algo', "--path_finding_algorithm", default = "dfs")
+    parser.add_argument('-v' "--visual", default = False)
+    parser.add_argument('-i', "--max_iterations", default = False)
+    parser.add_argument('-he', "--heuristic", default = "edit")
+    parser.add_argument('-m', "--metric", default = "path")
+    args = parser.parse_args(sys.argv[1:])
+
+    hard_maze = HardMazeGenerator(maze_dimension = int(args.maze_dimension),
+                                  probability_of_obstacles = float(args.probability_of_obstacles),
+                                  algorithm = args.path_finding_algorithm,
+                                  visual = bool(args.visual),
+                                  max_iterations = int(args.max_iterations),
+                                  metric = args.metric,
+                                  heuristic = args.heuristic)
     hard_maze._run()
     print(hard_maze.global_difficult_maze_metric)
     print(hard_maze.global_difficult_maze)
