@@ -47,6 +47,12 @@ class PathFinderAlgorithm():
     def _get_maximum_fringe_length(self):
         return self.max_fringe_length
 
+    def _get_algorithm_performance(self):
+        self.performance_dict = dict()
+        self.performance_dict['path_length'] = self._get_final_path_length()
+        self.performance_dict['maximum_fringe_size'] = self._get_maximum_fringe_length()
+        self.performance_dict['number_of_nodes_expanded'] = self._get_number_of_nodes_expanded()
+
     def _run_dfs(self):
 
         root = self.graph.graph_maze[0, 0]
@@ -260,7 +266,7 @@ class PathFinderAlgorithm():
         if len(self.path) == 1:
             print("NO PATH FOUND")
             return
-        
+
         # Reverse the final saved path
         self.path = self.path[::-1]
 
