@@ -36,11 +36,11 @@ class MazeRunner():
     def run(self):
 
         # Run the path finding algorithm on the graph
-        path_finder = PathFinderAlgorithm(graph = self.graph,
-                                          algorithm = self.algorithm,
-                                          visual = self.visual,
-                                          heuristic = self.heuristic)
-        path_finder.run_path_finder_algorithm()
+        self.path_finder = PathFinderAlgorithm(graph = self.graph,
+                                               algorithm = self.algorithm,
+                                               visual = self.visual,
+                                               heuristic = self.heuristic)
+        self.path_finder.run_path_finder_algorithm()
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description = 'generate path-finding algorithms to traverse mazes')
@@ -58,7 +58,4 @@ if __name__ == "__main__":
                              heuristic = args.heuristic)
 
     maze_runner.create_environment()
-    maze_runner.run()
-
-    maze_runner.modify_environment()
     maze_runner.run()

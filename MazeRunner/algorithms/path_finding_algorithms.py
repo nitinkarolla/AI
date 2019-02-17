@@ -38,20 +38,20 @@ class PathFinderAlgorithm():
     def _get_manhattan_distance(self, node, dest):
         return np.abs(node.row - dest.row) + np.abs(node.column - dest.column)
 
-    def _get_final_path_length(self):
+    def get_final_path_length(self):
         return len(self.path)
 
-    def _get_number_of_nodes_expanded(self):
+    def get_number_of_nodes_expanded(self):
         return len(self.visited)
 
-    def _get_maximum_fringe_length(self):
+    def get_maximum_fringe_length(self):
         return self.max_fringe_length
 
-    def _get_algorithm_performance(self):
+    def _create_performance_metrics(self):
         self.performance_dict = dict()
-        self.performance_dict['path_length'] = self._get_final_path_length()
-        self.performance_dict['maximum_fringe_size'] = self._get_maximum_fringe_length()
-        self.performance_dict['number_of_nodes_expanded'] = self._get_number_of_nodes_expanded()
+        self.performance_dict['path_length'] = self.get_final_path_length()
+        self.performance_dict['maximum_fringe_size'] = self.get_maximum_fringe_length()
+        self.performance_dict['number_of_nodes_expanded'] = self.get_number_of_nodes_expanded()
 
     def _run_dfs(self):
 
@@ -262,6 +262,9 @@ class PathFinderAlgorithm():
 
         # Get the final path
         self._get_final_path()
+
+        # Create performance metrics
+        self._create_performance_metrics()
 
         if len(self.path) == 1:
             print("NO PATH FOUND")
