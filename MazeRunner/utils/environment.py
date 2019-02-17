@@ -25,12 +25,14 @@ class Environment():
         self.maze[0, 0] = 4
         self.maze[n-1, n-1] = 4
 
+        # This will be the original maze
+        self.original_maze = self.maze.copy()
+
         # Create a copy of maze to render and update
         self.maze_copy = self.maze.copy()
 
     def render_maze(self, timer = 1e-10):
         # Create a mask for the particular cell and change its color to green
-        # masked_maze_copy = np.rot90(np.ma.masked_where(self.maze_copy == -1, self.maze_copy), k = 9)
         masked_maze_copy = np.rot90(np.ma.masked_where(self.maze_copy == -1, self.maze_copy), k = 9)
         self.cmap.set_bad(color = 'green')
 
@@ -61,24 +63,19 @@ class Environment():
         self.maze_copy[row, column] = 2
 
     def reset_environment(self):
-        self.maze = self.prev_maze
+        self.maze = self.original_maze.copy()
         self.maze_copy = self.maze.copy()
 
-    def modify_environment(self):
-
-        self.prev_maze = self.maze.copy()
-        random_row = np.random.choice(range(0, self.n - 1))
-        random_column = np.random.choice(range(0, self.n - 1))
-        
-        if random_row == 0 and random_column == 0:
-            random_row = 1
+    def modify_environment(self, row, column):
             
         # If the cell's value is 1 change it to 0 and vice-versa
-        if self.maze[random_row, random_column] == 0:
-            self.maze[random_row, random_column] = 1
+        if self.maze[row, column] == 0:
+            self.maze[row, column] = 1
 
-        if self.maze[random_row, random_column] == 1:
-            self.maze[random_row, random_column] = 0
+        if self.maze[row, column] == 1:
+            self.maze[row, column] = 0
+            print("HELLO")
+            print(self.maze)
 
         # Update copy of maze
         self.maze_copy = self.maze.copy()

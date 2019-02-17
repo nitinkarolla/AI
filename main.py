@@ -25,25 +25,25 @@ class MazeRunner():
         self.env.generate_maze(n = self.maze_dimension, p = self.probability_of_obstacles)
 
         # Generate graph from the maze
-        self.graph = Graph(environment = self.env)
-        self.graph.create_graph_from_maze()
+        self.create_graph_from_maze()
 
-    def modify_environment(self):
+    def modify_environment(self, row, column):
 
         # Modify the current maze environment
-        self.env.modify_environment()
+        self.env.modify_environment(row, column)
 
         # Generate graph from the new maze
+        self.create_graph_from_maze()
+
+    def create_graph_from_maze(self):
+
+        # Generate graph from an environment
         self.graph = Graph(environment = self.env)
         self.graph.create_graph_from_maze()
 
     def reset_environment(self):
-
         self.env.reset_environment()
-
-        # Generate graph from the new maze
-        self.graph = Graph(environment = self.env)
-        self.graph.create_graph_from_maze()
+        self.create_graph_from_maze()
 
     def run(self):
 
