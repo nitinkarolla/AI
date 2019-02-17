@@ -71,11 +71,8 @@ class Environment():
         # If the cell's value is 1 change it to 0 and vice-versa
         if self.maze[row, column] == 0:
             self.maze[row, column] = 1
-
-        if self.maze[row, column] == 1:
+        else:
             self.maze[row, column] = 0
-            print("HELLO")
-            print(self.maze)
 
         # Update copy of maze
         self.maze_copy = self.maze.copy()

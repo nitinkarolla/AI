@@ -1,5 +1,6 @@
 import argparse
 import sys
+import numpy as np
 from main import MazeRunner
 
 
@@ -35,46 +36,57 @@ class HardMazeGenerator():
 
         while iteration_count < self.max_iterations:
             maze_runner.create_environment()
+            maze_runner.run()
 
-            local_difficult_maze = None
-            local_difficult_maze_metric = 0
+            # current_difficult_maze = None
+            # current_difficult_maze_metric = 0
 
-            i = 0
+            current_difficult_maze = maze_runner.env.maze.copy()
+            current_difficult_maze_metric = maze_runner.path_finder.get_final_path_length()
+            parent_maze = current_difficult_maze.copy()
+            while True:
 
-            # Inside Terminate Condition
-            while i < (self.maze_dimension)**2 :
+                # Inside Terminate Condition
+                for i in range(self.maze_dimension) :
+                    for j in range(self.maze_dimension):
 
-                # Store the values of Maximum Difficult metric and the maze
-                maze_runner.run()
-                if maze_runner.path_finder.get_final_path_length() == 1 :
+                        if (i == 0 and j == 0) or (i == self.maze_dimension - 1
+                                                          and j == self.maze_dimension - 1):
+                            continue
+
+                        # Store the values of Maximum Difficult metric and the maze
+                        maze_runner.modify_environment(row = i, column = j)
+                        maze_runner.run()
+
+                        if maze_runner.path_finder.get_final_path_length() == 1 :
+                            maze_runner.reset_environment()
+                            continue
+                        
+                        if self.metric == "path":
+                            if maze_runner.path_finder.get_final_path_length() > current_difficult_maze_metric:
+                                current_difficult_maze_metric = maze_runner.path_finder.get_final_path_length()
+                                current_difficult_maze = maze_runner.env.maze.copy()
+                        elif self.metric == "memory":
+                            if maze_runner.path_finder.get_maximum_fringe_length() > current_difficult_maze_metric:
+                                current_difficult_maze_metric = maze_runner.path_finder.get_maximum_fringe_length()
+                                current_difficult_maze = maze_runner.env.maze.copy()
+                        elif self.metric == "nodes":
+                            if maze_runner.path_finder.get_number_of_nodes_expanded() > current_difficult_maze_metric:
+                                current_difficult_maze_metric = maze_runner.path_finder.get_number_of_nodes_expanded()
+                                current_difficult_maze = maze_runner.env.maze.copy()
+
+                        maze_runner.reset_environment()
+
+                if np.array_equal(current_difficult_maze, parent_maze):
                     break
-                if self.metric == "path":
-                    if maze_runner.path_finder.get_final_path_length() > local_difficult_maze_metric and maze_runner.path_finder.get_final_path_length() != 1:
-                        local_difficult_maze_metric = maze_runner.path_finder.get_final_path_length()
-                        local_difficult_maze = maze_runner.env.maze
-                    else :
-                        maze_runner.reset_environment()
-                elif self.metric == "memory":
-                    if maze_runner.path_finder.get_maximum_fringe_length() > local_difficult_maze_metric and maze_runner.path_finder.get_final_path_length() != 1:
-                        local_difficult_maze_metric = maze_runner.path_finder.get_maximum_fringe_length()
-                        local_difficult_maze = maze_runner.env.maze
-                    else :
-                        maze_runner.reset_environment()
-                elif self.metric == "nodes":
-                    if maze_runner.path_finder.get_number_of_nodes_expanded() > local_difficult_maze_metric and maze_runner.path_finder.get_final_path_length() != 1:
-                        local_difficult_maze_metric = maze_runner.path_finder.get_number_of_nodes_expanded()
-                        local_difficult_maze = maze_runner.env.maze
-                    else :
-                        maze_runner.reset_environment()
+                else:
+                    parent_maze = current_difficult_maze.copy()
+                    maze_runner.env.maze = parent_maze.copy()
+                    maze_runner.create_graph_from_maze()
 
-                # Modify the maze environment - randomly change the value of a cell
-                maze_runner.modify_environment()
-
-                i = i + 1
-
-            if self.global_difficult_maze_metric < local_difficult_maze_metric:
-                self.global_difficult_maze_metric = local_difficult_maze_metric
-                self.global_difficult_maze = local_difficult_maze
+            if self.global_difficult_maze_metric < current_difficult_maze_metric:
+                self.global_difficult_maze_metric = current_difficult_maze_metric
+                self.global_difficult_maze = current_difficult_maze
 
             # Stopping criteria design
             iteration_count = iteration_count + 1
