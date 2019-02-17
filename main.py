@@ -1,5 +1,9 @@
 import argparse
 import sys
+from time import time
+import matplotlib
+matplotlib.use("TkAgg")
+import matplotlib.pyplot as plt
 from MazeRunner.utils.graph import Graph
 from MazeRunner.utils.environment import Environment
 from MazeRunner.algorithms.path_finding_algorithms import PathFinderAlgorithm
@@ -43,12 +47,30 @@ class MazeRunner():
         self.path_finder.run_path_finder_algorithm()
 
     def find_solvable_map_size(self):
-        return
+        dim_list = range(10, 250, 10)
+        runtimes = dict()
+        for dim in dim_list:
+            print("Dim = " + str(dim))
+
+            self.maze_dimension = dim
+            self.create_environment()
+
+            start = time()
+            self.run()
+            end = time() - start
+            print(end)
+            runtimes[dim] = end
+            del self.path_finder
+
+        plt.plot(dim_list, runtimes.values(), marker = "o")
+        plt.figure()
+        plt.show()
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description = 'generate path-finding algorithms to traverse mazes')
     parser.add_argument("-n", "--maze_dimension", default = 10)
-    parser.add_argument("-p", "--probability_of_obstacles", default = 0.3)
+    parser.add_argument("-p", "--probability_of_obstacles", default = 0.2)
     parser.add_argument('-algo', "--path_finding_algorithm", default = "dfs")
     parser.add_argument('-v', "--visual", default = False)
     parser.add_argument('-he', "--heuristic", default = "edit")
@@ -61,9 +83,5 @@ if __name__ == "__main__":
                              heuristic = args.heuristic)
 
     maze_runner.create_environment()
-    maze_runner.env.render_maze(timer = 2)
-    maze_runner.env.modify_environment()
-    maze_runner.env.render_maze(timer=2)
-    maze_runner.env.reset_environment()
-    maze_runner.env.render_maze(timer=2)
-    # maze_runner.run()
+    # maze_runner.find_solvable_map_size()
+    maze_runner.run()
