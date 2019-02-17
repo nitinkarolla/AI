@@ -163,11 +163,6 @@ class PathFinderAlgorithm():
 
     def _run_astar(self):
 
-        # Keep track of maximum fringe length
-        fringe_length = len(self.fringe.queue)
-        if fringe_length >= self.max_fringe_length:
-            self.max_fringe_length = fringe_length
-
         root = self.graph.graph_maze[0, 0]
         dest = self.graph.graph_maze[self.graph.environment.n - 1, self.graph.environment.n - 1]
 
@@ -191,6 +186,12 @@ class PathFinderAlgorithm():
 
         self.visited.append(root)
         while self.fringe.queue:
+
+            # Keep track of maximum fringe length
+            fringe_length = len(self.fringe.queue)
+            if fringe_length >= self.max_fringe_length:
+                self.max_fringe_length = fringe_length
+
             temp_path = []
             node = self.fringe.get()
 
@@ -256,9 +257,12 @@ class PathFinderAlgorithm():
         # Get the final path
         self._get_final_path()
 
+        if len(self.path) == 1:
+            print("NO PATH FOUND")
+            return
+        
         # Reverse the final saved path
         self.path = self.path[::-1]
-        print(self.path)
 
         # Display the final highlighted path
         if self.visual == True:
