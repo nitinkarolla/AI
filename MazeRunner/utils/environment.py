@@ -60,3 +60,17 @@ class Environment():
             return
         self.maze_copy[row, column] = 2
 
+    def modify_environment(self):
+        random_row = np.random.choice(range(1, self.n - 1))
+        random_column = np.random.choice(range(1, self.n - 1))
+
+        # If the cell's value is 1 change it to 0 and vice-versa
+        if self.maze[random_row, random_column] == 0:
+            self.maze[random_row, random_column] = 1
+
+        if self.maze[random_row, random_column] == 1:
+            self.maze[random_row, random_column] = 0
+
+        # Update copy of maze
+        self.maze_copy = self.maze.copy()
+

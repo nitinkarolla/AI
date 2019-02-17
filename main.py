@@ -7,11 +7,31 @@ from MazeRunner.algorithms.path_finding_algorithms import PathFinderAlgorithm
 
 class MazeRunner():
 
-    def __init__(self, algorithm, visual, heuristic, graph):
+    def __init__(self, maze_dimension, probability_of_obstacles, algorithm, visual, heuristic):
         self.algorithm = algorithm
+        self.maze_dimension = maze_dimension
+        self.probability_of_obstacles = probability_of_obstacles
         self.visual = visual
         self.heuristic = heuristic
-        self.graph = graph
+
+    def create_environment(self):
+
+        # Create the maze
+        self.env = Environment()
+        self.env.generate_maze(n = self.maze_dimension, p = self.probability_of_obstacles)
+
+        # Generate graph from the maze
+        self.graph = Graph(environment = self.env)
+        self.graph.create_graph_from_maze()
+
+    def modify_environment(self):
+
+        # Modify the current maze environment
+        self.env.modify_environment()
+
+        # Generate graph from the new maze
+        self.graph = Graph(environment = self.env)
+        self.graph.create_graph_from_maze()
 
     def run(self):
 
@@ -31,17 +51,14 @@ if __name__ == "__main__":
     parser.add_argument('-he', "--heuristic", default = "edit")
     args = parser.parse_args(sys.argv[1:])
 
-    # Create the maze environment
-    env = Environment()
-    env.generate_maze(n = int(args.maze_dimension),
-                      p = float(args.probability_of_obstacles))
-
-    # Generate graph from the maze
-    graph = Graph(environment = env)
-    graph.create_graph_from_maze()
-
-    maze_runner = MazeRunner(algorithm = args.path_finding_algorithm,
-                             graph = graph,
+    maze_runner = MazeRunner(maze_dimension = int(args.maze_dimension),
+                             probability_of_obstacles = float(args.probability_of_obstacles),
+                             algorithm = args.path_finding_algorithm,
                              visual = bool(args.visual),
                              heuristic = args.heuristic)
+
+    maze_runner.create_environment()
+    maze_runner.run()
+
+    maze_runner.modify_environment()
     maze_runner.run()
