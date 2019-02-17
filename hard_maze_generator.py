@@ -21,7 +21,7 @@ class HardMazeGenerator():
         self.heuristic = heuristic
         self.max_iterations = max_iterations
 
-    def _run(self):
+    def run(self):
         maze_runner = MazeRunner(maze_dimension = self.maze_dimension,
                                  probability_of_obstacles = self.probability_of_obstacles,
                                  algorithm = self.algorithm,
@@ -97,9 +97,8 @@ if __name__ == "__main__":
                                   max_iterations = int(args.max_iterations),
                                   metric = args.metric,
                                   heuristic = args.heuristic)
-    hard_maze._run()
-    print(hard_maze.global_difficult_maze_metric)
-    print(hard_maze.global_difficult_maze)
+    hard_maze.run()
+
 
 
 
