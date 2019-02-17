@@ -42,6 +42,9 @@ class MazeRunner():
                                                heuristic = self.heuristic)
         self.path_finder.run_path_finder_algorithm()
 
+    def find_solvable_map_size(self):
+        return
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description = 'generate path-finding algorithms to traverse mazes')
     parser.add_argument("-n", "--maze_dimension", default = 10)
@@ -58,4 +61,9 @@ if __name__ == "__main__":
                              heuristic = args.heuristic)
 
     maze_runner.create_environment()
-    maze_runner.run()
+    maze_runner.env.render_maze(timer = 2)
+    maze_runner.env.modify_environment()
+    maze_runner.env.render_maze(timer=2)
+    maze_runner.env.reset_environment()
+    maze_runner.env.render_maze(timer=2)
+    # maze_runner.run()
