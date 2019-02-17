@@ -37,6 +37,14 @@ class MazeRunner():
         self.graph = Graph(environment = self.env)
         self.graph.create_graph_from_maze()
 
+    def reset_environment(self):
+
+        self.env.reset_environment()
+
+        # Generate graph from the new maze
+        self.graph = Graph(environment = self.env)
+        self.graph.create_graph_from_maze()
+
     def run(self):
 
         # Run the path finding algorithm on the graph
