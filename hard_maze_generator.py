@@ -42,7 +42,7 @@ class HardMazeGenerator():
             i = 0
 
             # Inside Terminate Condition
-            while i < (self.n)**2 :
+            while i < (self.maze_dimension)**2 :
 
                 # Store the values of Maximum Difficult metric and the maze
                 maze_runner.run()
@@ -84,7 +84,7 @@ if __name__ == "__main__":
     parser.add_argument("-n", "--maze_dimension", default = 10)
     parser.add_argument("-p", "--probability_of_obstacles", default = 0.2)
     parser.add_argument('-algo', "--path_finding_algorithm", default = "dfs")
-    parser.add_argument('-v' "--visual", default = False)
+    parser.add_argument('-v', "--visual", default = False)
     parser.add_argument('-i', "--max_iterations", default = False)
     parser.add_argument('-he', "--heuristic", default = "edit")
     parser.add_argument('-m', "--metric", default = "path")
