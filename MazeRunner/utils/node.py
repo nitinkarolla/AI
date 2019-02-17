@@ -41,7 +41,7 @@ class Node():
     def __lt__(self, other):
         selfPriority = self.distance_from_source + self.distance_from_dest
         otherPriority = other.distance_from_source + other.distance_from_dest
-        return selfPriority < otherPriority
+        return selfPriority <= otherPriority
 
     def get_heuristic(self):
         return (self.distance_from_source + self.distance_from_dest)

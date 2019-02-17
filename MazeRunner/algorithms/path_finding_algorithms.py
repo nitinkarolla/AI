@@ -1,4 +1,3 @@
-import heapq
 import numpy as np
 import queue as Q
 
@@ -8,12 +7,14 @@ class PathFinderAlgorithm():
     BfsString = "bfs"
     AStarString = "astar"
 
-    def __init__(self, graph = None, algorithm = None, visual = False):
+    def __init__(self, graph = None, algorithm = None, visual = False, heuristic = None):
         self.graph = graph
         self.algorithm = algorithm
         self.visual = visual
+        self.heuristic = heuristic
         self.visited = []
         self.path = []
+        self.max_fringe_length = 0
 
     def _get_unvisited_children(self, node_children):
         unvisited_children = []
@@ -31,11 +32,20 @@ class PathFinderAlgorithm():
             self.path.append((node.row, node.column))
             node = node.parent
 
-    def _get_edit_distance(self, node, dest):
+    def _get_euclidien_distance(self, node, dest):
         return np.sqrt((node.row - dest.row)**2 + (node.column - dest.column)**2)
 
     def _get_manhattan_distance(self, node, dest):
-        return
+        return np.abs(node.row - dest.row) + np.abs(node.column - dest.column)
+
+    def _get_final_path_length(self):
+        return len(self.path)
+
+    def _get_number_of_nodes_expanded(self):
+        return len(self.visited)
+
+    def _get_maximum_fringe_length(self):
+        return self.max_fringe_length
 
     def _run_dfs(self):
 
@@ -45,6 +55,12 @@ class PathFinderAlgorithm():
         self.fringe = [root]
         self.visited.append(root)
         while self.fringe:
+
+            # Keep track of maximum fringe length
+            fringe_length = len(self.fringe)
+            if fringe_length >= self.max_fringe_length:
+                self.max_fringe_length = fringe_length
+
             node = self.fringe.pop()
 
             # update color of the cell and render the maze
@@ -90,6 +106,12 @@ class PathFinderAlgorithm():
         self.fringe = [root]
         self.visited.append(root)
         while self.fringe:
+
+            # Keep track of maximum fringe length
+            fringe_length = len(self.fringe)
+            if fringe_length >= self.max_fringe_length:
+                self.max_fringe_length = fringe_length
+
             temp_path = []
             node = self.fringe.pop(0)
 
@@ -100,10 +122,10 @@ class PathFinderAlgorithm():
             unvisited_children = self._get_unvisited_children(node_children)
 
             for child in unvisited_children:
-                child.parent = node
 
                 # If child has been added to the fringe by some previous node, then dont add it again.
                 if child not in self.fringe:
+                    child.parent = node
                     self.fringe.append(child)
 
             # Get the path through which you reach this node from the root node
@@ -119,7 +141,9 @@ class PathFinderAlgorithm():
             # Update the color of the path which we found above by popping the root first and the subsequent nodes.
             while (len(temp_path) != 0):
                 temp_node = temp_path.pop()
-                if self.visual == True:         #Visualisation Parameter added
+
+                # Visualisation Parameter added
+                if self.visual == True:
                     self.graph.environment.update_color_of_cell(temp_node.row, temp_node.column)
                     self.graph.environment.render_maze()
 
@@ -130,12 +154,19 @@ class PathFinderAlgorithm():
             # We reset the entire path again to render a new path in the next iteration.
             while (len(temp_path_copy) != 0):
                 temp_node = temp_path_copy.pop(0)
-                if self.visual == True:        #Visualisation Parameter added
+
+                # Visualisation Parameter added
+                if self.visual == True:
                     self.graph.environment.reset_color_of_cell(temp_node.row, temp_node.column)
                     self.graph.environment.render_maze()
 
 
-    def _run_astar(self, heuristic = "edit"):
+    def _run_astar(self):
+
+        # Keep track of maximum fringe length
+        fringe_length = len(self.fringe.queue)
+        if fringe_length >= self.max_fringe_length:
+            self.max_fringe_length = fringe_length
 
         root = self.graph.graph_maze[0, 0]
         dest = self.graph.graph_maze[self.graph.environment.n - 1, self.graph.environment.n - 1]
@@ -145,8 +176,8 @@ class PathFinderAlgorithm():
             for column in range(len(self.graph.environment.maze)):
                 if self.graph.environment.maze[row, column] == 0:
                     continue
-                if heuristic == "edit":
-                    self.graph.graph_maze[row, column].distance_from_dest = self._get_edit_distance(
+                if self.heuristic == "edit":
+                    self.graph.graph_maze[row, column].distance_from_dest = self._get_euclidien_distance(
                         self.graph.graph_maze[row, column], dest)
                 else:
                     self.graph.graph_maze[row, column].distance_from_dest = self._get_manhattan_distance(
@@ -159,10 +190,9 @@ class PathFinderAlgorithm():
         self.fringe.put(root)
 
         self.visited.append(root)
-        while self.fringe:
+        while self.fringe.queue:
             temp_path = []
             node = self.fringe.get()
-            # print(self.fringe.queue)
 
             if node not in self.visited:
                 self.visited.append(node)
@@ -170,47 +200,50 @@ class PathFinderAlgorithm():
             node_children = node.get_children(node = node, algorithm = self.algorithm)
 
             for child in node_children:
-                if child is None:
+                if child is None or child in self.visited:
                     continue
-
-                child.parent = node
-                child.distance_from_source = node.distance_from_source + 1
 
                 # If child has been added to the fringe by some previous node, then dont add it again.
                 if child not in self.fringe.queue:
-
+                    child.parent = node
+                    child.distance_from_source = node.distance_from_source + 1
                     self.fringe.put(child)
                 else:
-                    child_from_fringe = self.fringe.get(child)
-                    # print(child_from_fringe)
-                    # print(child)
-                    s
+                    if child.get_heuristic() >= node.distance_from_source + child.distance_from_dest:
+                        child.parent = node
+                        child.distance_from_source = node.distance_from_source + 1
 
             # Get the path through which you reach this node from the root node
-            # flag = True
-            # temp_node = node
-            # while (flag):
-            #     temp_path.append(temp_node)
-            #     temp_node = temp_node.parent
-            #     if temp_node is None:
-            #         flag = False
-            # temp_path_copy = temp_path.copy()
-            #
-            # # Update the color of the path which we found above by popping the root first and the subsequent nodes.
-            # while (len(temp_path) != 0):
-            #     temp_node = temp_path.pop()
-            #     self.graph.environment.update_color_of_cell(temp_node.row, temp_node.column)
-            #     self.graph.environment.render_maze()
-            #
-            # # if you reach the destination, then break
-            # if (node == dest):
-            #     break
-            #
-            # # We reset the entire path again to render a new path in the next iteration.
-            # while (len(temp_path_copy) != 0):
-            #     temp_node = temp_path_copy.pop(0)
-            #     self.graph.environment.reset_color_of_cell(temp_node.row, temp_node.column)
-            #     self.graph.environment.render_maze()
+            flag = True
+            temp_node = node
+            while (flag):
+                temp_path.append(temp_node)
+                temp_node = temp_node.parent
+                if temp_node is None:
+                    flag = False
+            temp_path_copy = temp_path.copy()
+
+            # Update the color of the path which we found above by popping the root first and the subsequent nodes.
+            while (len(temp_path) != 0):
+                temp_node = temp_path.pop()
+
+                # Visualisation Parameter added
+                if self.visual == True:
+                    self.graph.environment.update_color_of_cell(temp_node.row, temp_node.column)
+                    self.graph.environment.render_maze()
+
+            # if you reach the destination, then break
+            if (node == dest):
+                break
+
+            # We reset the entire path again to render a new path in the next iteration.
+            while (len(temp_path_copy) != 0):
+                temp_node = temp_path_copy.pop(0)
+
+                # Visualisation Parameter added
+                if self.visual == True:
+                    self.graph.environment.reset_color_of_cell(temp_node.row, temp_node.column)
+                    self.graph.environment.render_maze()
 
     def run_path_finder_algorithm(self):
         if self.algorithm == self.DfsString:
@@ -226,6 +259,7 @@ class PathFinderAlgorithm():
         # Reverse the final saved path
         self.path = self.path[::-1]
         print(self.path)
+
         # Display the final highlighted path
         if self.visual == True:
             self.graph.environment.render_maze(timer = 10)
