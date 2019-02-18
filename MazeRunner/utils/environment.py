@@ -31,7 +31,7 @@ class Environment():
         # Create a copy of maze to render and update
         self.maze_copy = self.maze.copy()
 
-    def render_maze(self, timer = 1e-10):
+    def render_maze(self, title = None, timer = 1e-10):
         # Create a mask for the particular cell and change its color to green
         masked_maze_copy = np.rot90(np.ma.masked_where(self.maze_copy == -1, self.maze_copy), k = 9)
         self.cmap.set_bad(color = 'green')
@@ -50,6 +50,7 @@ class Environment():
         plt.yticks([])
         plt.ion()
         plt.show()
+        plt.title(title)
         plt.pause(timer)
 
     def update_color_of_cell(self, row, column):

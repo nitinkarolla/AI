@@ -1,6 +1,7 @@
 import argparse
 import sys
 import numpy as np
+import os
 from main import MazeRunner
 
 
@@ -21,8 +22,12 @@ class HardMazeGenerator():
         self.visual = visual
         self.heuristic = heuristic
         self.max_iterations = max_iterations
+        self.image_path = os.curdir + '/output/hard_maze/' + os.sep + self.algorithm + \
+                          os.sep + str(self.maze_dimension) + '_' + str(self.probability_of_obstacles)
 
     def run(self):
+        os.makedirs(self.image_path, exist_ok = True)
+
         maze_runner = MazeRunner(maze_dimension = self.maze_dimension,
                                  probability_of_obstacles = self.probability_of_obstacles,
                                  algorithm = self.algorithm,
