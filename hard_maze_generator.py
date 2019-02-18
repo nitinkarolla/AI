@@ -7,13 +7,13 @@ from main import MazeRunner
 class HardMazeGenerator():
 
     def __init__(self,
-                 maze_dimension = 5,
+                 maze_dimension = 4,
                  probability_of_obstacles = 0.2,
                  algorithm = 'dfs',
                  metric = "path",
                  heuristic = None,
                  max_iterations = 100,
-                 visual = None):
+                 visual = True):
         self.maze_dimension = maze_dimension
         self.probability_of_obstacles = probability_of_obstacles
         self.algorithm = algorithm
@@ -38,8 +38,9 @@ class HardMazeGenerator():
             maze_runner.create_environment()
             maze_runner.run()
 
-            # current_difficult_maze = None
-            # current_difficult_maze_metric = 0
+            if maze_runner.path_finder.get_final_path_length() == 1 :
+                iteration_count = iteration_count + 1
+                continue
 
             current_difficult_maze = maze_runner.env.maze.copy()
             current_difficult_maze_metric = maze_runner.path_finder.get_final_path_length()
@@ -82,11 +83,13 @@ class HardMazeGenerator():
                 else:
                     parent_maze = current_difficult_maze.copy()
                     maze_runner.env.maze = parent_maze.copy()
+                    maze_runner.env.original_maze = parent_maze.copy()
+                    maze_runner.env.maze_copy = maze_runner.env.maze.copy()
                     maze_runner.create_graph_from_maze()
 
             if self.global_difficult_maze_metric < current_difficult_maze_metric:
                 self.global_difficult_maze_metric = current_difficult_maze_metric
-                self.global_difficult_maze = current_difficult_maze
+                self.global_difficult_maze = current_difficult_maze.copy()
 
             # Stopping criteria design
             iteration_count = iteration_count + 1
@@ -109,6 +112,8 @@ if __name__ == "__main__":
                                   max_iterations = int(args.max_iterations),
                                   metric = args.metric,
                                   heuristic = args.heuristic)
+
+    # hard_maze = HardMazeGenerator()
     hard_maze.run()
 
 
