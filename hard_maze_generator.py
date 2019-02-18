@@ -61,11 +61,11 @@ class HardMazeGenerator():
                             continue
 
                         # Store the values of Maximum Difficult metric and the maze
-                        maze_runner.modify_environment(row = i, column = j)
+                        maze_runner.env.modify_environment(row = i, column = j)
                         maze_runner.run()
 
                         if maze_runner.path_finder.get_final_path_length() == 1 :
-                            maze_runner.reset_environment()
+                            maze_runner.env.reset_environment()
                             continue
                         
                         if self.metric == "path":
@@ -81,16 +81,14 @@ class HardMazeGenerator():
                                 current_difficult_maze_metric = maze_runner.path_finder.get_number_of_nodes_expanded()
                                 current_difficult_maze = maze_runner.env.maze.copy()
 
-                        maze_runner.reset_environment()
+                        maze_runner.env.reset_environment()
 
                 if np.array_equal(current_difficult_maze, parent_maze):
                     break
                 else:
                     parent_maze = current_difficult_maze.copy()
-                    maze_runner.env.maze = parent_maze.copy()
-                    maze_runner.env.original_maze = parent_maze.copy()
-                    maze_runner.env.maze_copy = maze_runner.env.maze.copy()
-                    maze_runner.create_graph_from_maze()
+                    maze_runner.env.modify_environment(new_maze = parent_maze.copy())
+                    maze_runner.env.set_original_maze(new_maze = parent_maze.copy())
 
             if self.global_difficult_maze_metric < current_difficult_maze_metric:
                 self.global_difficult_maze_metric = current_difficult_maze_metric
@@ -118,7 +116,6 @@ if __name__ == "__main__":
                                   metric = args.metric,
                                   heuristic = args.heuristic)
 
-    # hard_maze = HardMazeGenerator()
     hard_maze.run()
 
 

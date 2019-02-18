@@ -2,6 +2,7 @@ import matplotlib
 matplotlib.use('tkAgg')
 from pylab import *
 from matplotlib import colors
+from MazeRunner.utils.graph import Graph
 
 
 class Environment():
@@ -30,6 +31,13 @@ class Environment():
 
         # Create a copy of maze to render and update
         self.maze_copy = self.maze.copy()
+
+    def set_original_maze(self, new_maze):
+        self.original_maze = new_maze
+
+    def create_graph_from_maze(self):
+        self.graph = Graph(maze = self.maze)
+        self.graph.create_graph_from_maze()
 
     def render_maze(self, title = None, timer = 1e-10):
         # Create a mask for the particular cell and change its color to green
@@ -66,8 +74,15 @@ class Environment():
     def reset_environment(self):
         self.maze = self.original_maze.copy()
         self.maze_copy = self.maze.copy()
+        self.create_graph_from_maze()
 
-    def modify_environment(self, row, column):
+    def modify_environment(self, row = None, column = None, new_maze = None):
+
+        if new_maze is not None:
+            self.maze = new_maze
+            self.maze_copy = self.maze.copy()
+            self.create_graph_from_maze()
+            return
             
         # If the cell's value is 1 change it to 0 and vice-versa
         if self.maze[row, column] == 0:
@@ -77,4 +92,5 @@ class Environment():
 
         # Update copy of maze
         self.maze_copy = self.maze.copy()
+        self.create_graph_from_maze()
 

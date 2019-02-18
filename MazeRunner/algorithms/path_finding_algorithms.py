@@ -7,8 +7,9 @@ class PathFinderAlgorithm():
     BfsString = "bfs"
     AStarString = "astar"
 
-    def __init__(self, graph = None, algorithm = None, visual = False, heuristic = None):
-        self.graph = graph
+    def __init__(self, environment = None, algorithm = None, visual = False, heuristic = None):
+        self.environment = environment
+        self.graph_maze = self.environment.graph.graph_maze
         self.algorithm = algorithm
         self.visual = visual
         self.heuristic = heuristic
@@ -27,7 +28,7 @@ class PathFinderAlgorithm():
         return unvisited_children
 
     def _get_final_path(self):
-        node = self.graph.graph_maze[self.graph.environment.n - 1, self.graph.environment.n - 1]
+        node = self.graph_maze[self.environment.n - 1, self.environment.n - 1]
         while node is not None:
             self.path.append((node.row, node.column))
             node = node.parent
@@ -55,8 +56,8 @@ class PathFinderAlgorithm():
 
     def _run_dfs(self):
 
-        root = self.graph.graph_maze[0, 0]
-        dest = self.graph.graph_maze[self.graph.environment.n - 1, self.graph.environment.n - 1]
+        root = self.graph_maze[0, 0]
+        dest = self.graph_maze[self.environment.n - 1, self.environment.n - 1]
 
         self.fringe = [root]
         self.visited.append(root)
@@ -71,8 +72,8 @@ class PathFinderAlgorithm():
 
             # update color of the cell and render the maze
             if self.visual == True :            #Added visualisation parameter
-                self.graph.environment.update_color_of_cell(node.row, node.column)
-                self.graph.environment.render_maze()
+                self.environment.update_color_of_cell(node.row, node.column)
+                self.environment.render_maze()
 
             # if you reach the destination, then break
             if (node == dest):
@@ -92,8 +93,8 @@ class PathFinderAlgorithm():
                 # because there is no further path from this cell.
                 if len(unvisited_children) == 0:
                     if self.visual == True:         #Added visualisation parameter --Nitin & Vedant
-                        self.graph.environment.reset_color_of_cell(node.row, node.column)
-                        self.graph.environment.render_maze()
+                        self.environment.reset_color_of_cell(node.row, node.column)
+                        self.environment.render_maze()
                 else:
                     for child in unvisited_children:
                         child.parent = node
@@ -106,8 +107,8 @@ class PathFinderAlgorithm():
 
     def _run_bfs(self):
 
-        root = self.graph.graph_maze[0, 0]
-        dest = self.graph.graph_maze[self.graph.environment.n - 1, self.graph.environment.n - 1]
+        root = self.graph_maze[0, 0]
+        dest = self.graph_maze[self.environment.n - 1, self.environment.n - 1]
 
         self.fringe = [root]
         self.visited.append(root)
@@ -150,8 +151,8 @@ class PathFinderAlgorithm():
 
                 # Visualisation Parameter added
                 if self.visual == True:
-                    self.graph.environment.update_color_of_cell(temp_node.row, temp_node.column)
-                    self.graph.environment.render_maze()
+                    self.environment.update_color_of_cell(temp_node.row, temp_node.column)
+                    self.environment.render_maze()
 
             # if you reach the destination, then break
             if (node == dest):
@@ -163,26 +164,26 @@ class PathFinderAlgorithm():
 
                 # Visualisation Parameter added
                 if self.visual == True:
-                    self.graph.environment.reset_color_of_cell(temp_node.row, temp_node.column)
-                    self.graph.environment.render_maze()
+                    self.environment.reset_color_of_cell(temp_node.row, temp_node.column)
+                    self.environment.render_maze()
 
 
     def _run_astar(self):
 
-        root = self.graph.graph_maze[0, 0]
-        dest = self.graph.graph_maze[self.graph.environment.n - 1, self.graph.environment.n - 1]
+        root = self.graph_maze[0, 0]
+        dest = self.graph_maze[self.environment.n - 1, self.environment.n - 1]
 
         # Assign distance from each node to the destination
-        for row in range(len(self.graph.environment.maze)):
-            for column in range(len(self.graph.environment.maze)):
-                if self.graph.environment.maze[row, column] == 0:
+        for row in range(len(self.environment.maze)):
+            for column in range(len(self.environment.maze)):
+                if self.environment.maze[row, column] == 0:
                     continue
                 if self.heuristic == "edit":
-                    self.graph.graph_maze[row, column].distance_from_dest = self._get_euclidien_distance(
-                        self.graph.graph_maze[row, column], dest)
+                    self.graph_maze[row, column].distance_from_dest = self._get_euclidien_distance(
+                        self.graph_maze[row, column], dest)
                 else:
-                    self.graph.graph_maze[row, column].distance_from_dest = self._get_manhattan_distance(
-                        self.graph.graph_maze[row, column], dest)
+                    self.graph_maze[row, column].distance_from_dest = self._get_manhattan_distance(
+                        self.graph_maze[row, column], dest)
 
         # Root is at a distance of 0 from itself
         root.distance_from_source = 0
@@ -236,8 +237,8 @@ class PathFinderAlgorithm():
 
                 # Visualisation Parameter added
                 if self.visual == True:
-                    self.graph.environment.update_color_of_cell(temp_node.row, temp_node.column)
-                    self.graph.environment.render_maze()
+                    self.environment.update_color_of_cell(temp_node.row, temp_node.column)
+                    self.environment.render_maze()
 
             # if you reach the destination, then break
             if (node == dest):
@@ -249,8 +250,8 @@ class PathFinderAlgorithm():
 
                 # Visualisation Parameter added
                 if self.visual == True:
-                    self.graph.environment.reset_color_of_cell(temp_node.row, temp_node.column)
-                    self.graph.environment.render_maze()
+                    self.environment.reset_color_of_cell(temp_node.row, temp_node.column)
+                    self.environment.render_maze()
 
     def run_path_finder_algorithm(self):
         if self.algorithm == self.DfsString:
@@ -275,4 +276,4 @@ class PathFinderAlgorithm():
 
         # Display the final highlighted path
         if self.visual == True:
-            self.graph.environment.render_maze(timer = 0.1)
+            self.environment.render_maze(timer = 0.1)

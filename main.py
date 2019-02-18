@@ -4,7 +4,6 @@ from time import time
 import matplotlib
 matplotlib.use("TkAgg")
 import matplotlib.pyplot as plt
-from MazeRunner.utils.graph import Graph
 from MazeRunner.utils.environment import Environment
 from MazeRunner.algorithms.path_finding_algorithms import PathFinderAlgorithm
 
@@ -25,30 +24,12 @@ class MazeRunner():
         self.env.generate_maze(n = self.maze_dimension, p = self.probability_of_obstacles)
 
         # Generate graph from the maze
-        self.create_graph_from_maze()
-
-    def modify_environment(self, row, column):
-
-        # Modify the current maze environment
-        self.env.modify_environment(row, column)
-
-        # Generate graph from the new maze
-        self.create_graph_from_maze()
-
-    def create_graph_from_maze(self):
-
-        # Generate graph from an environment
-        self.graph = Graph(environment = self.env)
-        self.graph.create_graph_from_maze()
-
-    def reset_environment(self):
-        self.env.reset_environment()
-        self.create_graph_from_maze()
+        self.env.create_graph_from_maze()
 
     def run(self):
 
         # Run the path finding algorithm on the graph
-        self.path_finder = PathFinderAlgorithm(graph = self.graph,
+        self.path_finder = PathFinderAlgorithm(environment = self.env,
                                                algorithm = self.algorithm,
                                                visual = self.visual,
                                                heuristic = self.heuristic)
@@ -91,5 +72,4 @@ if __name__ == "__main__":
                              heuristic = args.heuristic)
 
     maze_runner.create_environment()
-    # maze_runner.find_solvable_map_size()
     maze_runner.run()
