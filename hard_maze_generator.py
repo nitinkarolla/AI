@@ -26,7 +26,7 @@ class HardMazeGenerator():
                           os.sep + str(self.maze_dimension) + '_' + str(self.probability_of_obstacles)
 
     def run(self):
-        os.makedirs(self.image_path, exist_ok = True)
+        # os.makedirs(self.image_path, exist_ok = True)
 
         maze_runner = MazeRunner(maze_dimension = self.maze_dimension,
                                  probability_of_obstacles = self.probability_of_obstacles,

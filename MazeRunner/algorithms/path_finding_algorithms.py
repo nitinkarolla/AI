@@ -275,4 +275,4 @@ class PathFinderAlgorithm():
 
         # Display the final highlighted path
         if self.visual == True:
-            self.graph.environment.render_maze(timer = 0.5, save_image = self.save_image)
+            self.graph.environment.render_maze(timer = 0.1)
