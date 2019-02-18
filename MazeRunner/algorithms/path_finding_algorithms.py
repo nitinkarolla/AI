@@ -73,6 +73,37 @@ class PathFinderAlgorithm():
             # update color of the cell and render the maze
             if self.visual == True :            #Added visualisation parameter
                 self.environment.update_color_of_cell(node.row, node.column)
+                #fire_blocks = self.environment.maze_copy[self.environment.maze_copy == 3]
+
+                fire_blocks = np.argwhere(self.environment.maze_copy == 3)
+                i_curr_burn = []
+
+                for i in zip(fire_blocks):
+                    i_curr_burn.append(tuple((i[0][0], i[0][1])))
+
+                for i in i_curr_burn:
+                    curr = self.environment.graph.graph_maze[i[0], i[1]]
+                    fire_kids = curr.get_children(node = curr, algorithm = self.algorithm)
+
+                    fire_grandkids = []
+
+                    for beta in fire_kids:
+                        if beta is None:
+                            continue
+
+                        every_kid = beta.get_children(node = beta, algorithm = self.algorithm)
+
+                        k = 0
+                        for kid in every_kid:
+                            if kid is None:
+                                continue
+                            if kid.value == 3:
+                                k += 1
+                                # print(k)
+                        val = np.random.choice(2, 1, [(0.5**k, 1 - (0.5**k))])
+                        if val[0] == 1:
+                            self.environment.wild_fire(beta.row, beta.column)
+
                 self.environment.render_maze()
 
             # if you reach the destination, then break

@@ -16,7 +16,7 @@ class Environment():
         self.fire = fire
 
         # The default colormap of our maze - 0: Black, 1: White, 2: Grey
-        self.cmap = colors.ListedColormap(['black', 'white', 'grey', 'yellow', 'red'])
+        self.cmap = colors.ListedColormap(['black', 'white', 'grey', 'orange', 'red'])
         self.norm = colors.BoundaryNorm(boundaries = [0, 1, 2, 3, 4], ncolors = 4)
 
     def generate_maze(self, n = DimensionOfMaze, p = ProbabilityOfBlockedMaze):
@@ -42,7 +42,7 @@ class Environment():
         self.graph = Graph(maze = self.maze)
         self.graph.create_graph_from_maze()
 
-    def render_maze(self, title = None, timer = 1e-10):
+    def render_maze(self, title = None, timer = 1):
         # Create a mask for the particular cell and change its color to green
         masked_maze_copy = np.rot90(np.ma.masked_where(self.maze_copy == -1, self.maze_copy), k = 1)
         self.cmap.set_bad(color = 'green')
@@ -73,6 +73,11 @@ class Environment():
         if (row == 0 and column == 0) or (row == self.n - 1 and column == self.n - 1):
             return
         self.maze_copy[row, column] = 2
+
+    def wild_fire(self, row, column):
+        if (row == 0 and column == 0) or (row == self.n - 1 and column == self.n - 1):
+            return
+        self.maze_copy[row, column] = 3
 
     def reset_environment(self):
         self.maze = self.original_maze.copy()
