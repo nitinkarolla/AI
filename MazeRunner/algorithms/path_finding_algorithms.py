@@ -1,11 +1,14 @@
 import numpy as np
 import queue as Q
+from MazeRunner.utils.environment import Environment
+from sklearn.tree import DecisionTreeClassifier
 
 
 class PathFinderAlgorithm():
     DfsString = "dfs"
     BfsString = "bfs"
     AStarString = "astar"
+    ThinningAStar = "thin_astar"
 
     def __init__(self, environment = None, algorithm = None, visual = False, heuristic = None):
         self.environment = environment
@@ -16,6 +19,11 @@ class PathFinderAlgorithm():
         self.visited = []
         self.path = []
         self.max_fringe_length = 0
+
+        if self.algorithm in ['dfs', 'bfs']:
+            self.title = "Algorithm: " + self.algorithm
+        else:
+            self.title = "Algorithm: " + self.algorithm + "    Heuristic: " + self.heuristic
 
     def _get_unvisited_children(self, node_children):
         unvisited_children = []
@@ -39,6 +47,11 @@ class PathFinderAlgorithm():
     def _get_manhattan_distance(self, node, dest):
         return np.abs(node.row - dest.row) + np.abs(node.column - dest.column)
 
+    def _calculate_heuristic(self, node, dest):
+        if self.heuristic == "euclid":
+            return self._get_euclidien_distance(node, dest)
+        return self._get_manhattan_distance(node, dest)
+
     def get_final_path_length(self):
         return len(self.path)
 
@@ -54,10 +67,7 @@ class PathFinderAlgorithm():
         self.performance_dict['maximum_fringe_size'] = self.get_maximum_fringe_length()
         self.performance_dict['number_of_nodes_expanded'] = self.get_number_of_nodes_expanded()
 
-    def _run_dfs(self):
-
-        root = self.graph_maze[0, 0]
-        dest = self.graph_maze[self.environment.n - 1, self.environment.n - 1]
+    def _run_dfs(self, root, dest):
 
         self.fringe = [root]
         self.visited.append(root)
@@ -73,7 +83,7 @@ class PathFinderAlgorithm():
             # update color of the cell and render the maze
             if self.visual == True :            #Added visualisation parameter
                 self.environment.update_color_of_cell(node.row, node.column)
-                self.environment.render_maze()
+                self.environment.render_maze(title = self.title)
 
             # if you reach the destination, then break
             if (node == dest):
@@ -94,7 +104,7 @@ class PathFinderAlgorithm():
                 if len(unvisited_children) == 0:
                     if self.visual == True:         #Added visualisation parameter --Nitin & Vedant
                         self.environment.reset_color_of_cell(node.row, node.column)
-                        self.environment.render_maze()
+                        self.environment.render_maze(title = self.title)
                 else:
                     for child in unvisited_children:
                         child.parent = node
@@ -105,10 +115,7 @@ class PathFinderAlgorithm():
                 if node is None:
                     flag = False
 
-    def _run_bfs(self):
-
-        root = self.graph_maze[0, 0]
-        dest = self.graph_maze[self.environment.n - 1, self.environment.n - 1]
+    def _run_bfs(self, root, dest):
 
         self.fringe = [root]
         self.visited.append(root)
@@ -152,7 +159,7 @@ class PathFinderAlgorithm():
                 # Visualisation Parameter added
                 if self.visual == True:
                     self.environment.update_color_of_cell(temp_node.row, temp_node.column)
-                    self.environment.render_maze()
+                    self.environment.render_maze(title = self.title)
 
             # if you reach the destination, then break
             if (node == dest):
@@ -165,25 +172,9 @@ class PathFinderAlgorithm():
                 # Visualisation Parameter added
                 if self.visual == True:
                     self.environment.reset_color_of_cell(temp_node.row, temp_node.column)
-                    self.environment.render_maze()
+                    self.environment.render_maze(title = self.title)
 
-
-    def _run_astar(self):
-
-        root = self.graph_maze[0, 0]
-        dest = self.graph_maze[self.environment.n - 1, self.environment.n - 1]
-
-        # Assign distance from each node to the destination
-        for row in range(len(self.environment.maze)):
-            for column in range(len(self.environment.maze)):
-                if self.environment.maze[row, column] == 0:
-                    continue
-                if self.heuristic == "edit":
-                    self.graph_maze[row, column].distance_from_dest = self._get_euclidien_distance(
-                        self.graph_maze[row, column], dest)
-                else:
-                    self.graph_maze[row, column].distance_from_dest = self._get_manhattan_distance(
-                        self.graph_maze[row, column], dest)
+    def _run_astar(self, root, dest):
 
         # Root is at a distance of 0 from itself
         root.distance_from_source = 0
@@ -211,9 +202,9 @@ class PathFinderAlgorithm():
                 if child is None or child in self.visited:
                     continue
 
-                # If child has been added to the fringe by some previous node, then dont add it again.
                 if child not in self.fringe.queue:
                     child.parent = node
+                    child.distance_from_dest = self._calculate_heuristic(child, dest)
                     child.distance_from_source = node.distance_from_source + 1
                     self.fringe.put(child)
                 else:
@@ -253,13 +244,165 @@ class PathFinderAlgorithm():
                     self.environment.reset_color_of_cell(temp_node.row, temp_node.column)
                     self.environment.render_maze()
 
+    def _calculate_thinning_heuristic(self, simpler_maze_env, node_row, node_column):
+
+        root = simpler_maze_env.graph.graph_maze[node_row, node_column]
+        dest = simpler_maze_env.graph.graph_maze[simpler_maze_env.n - 1, simpler_maze_env.n - 1]
+
+        # Root is at a distance of 0 from itself
+        root.distance_from_source = 0
+
+        fringe = Q.PriorityQueue()
+        visited = []
+        path = []
+        fringe.put(root)
+
+        visited.append(root)
+        while fringe.queue:
+
+            node = fringe.get()
+
+            if node not in visited:
+                visited.append(node)
+
+            node_children = node.get_children(node = node, algorithm = self.algorithm)
+
+            for child in node_children:
+                if child is None or child in visited:
+                    continue
+
+                if child not in fringe.queue:
+                    child.parent = node
+                    child.distance_from_dest = self._calculate_heuristic(child, dest)
+                    child.distance_from_source = node.distance_from_source + 1
+                    fringe.put(child)
+                else:
+                    if child.get_heuristic() >= node.distance_from_source + child.distance_from_dest:
+                        child.parent = node
+                        child.distance_from_source = node.distance_from_source + 1
+
+            # if you reach the destination, then break
+            if (node == dest):
+                break
+
+        node = simpler_maze_env.graph.graph_maze[simpler_maze_env.n - 1, simpler_maze_env.n - 1]
+        while node is not None:
+            path.append((node.row, node.column))
+            node = node.parent
+
+        return len(path)
+
+    def _create_simpler_maze(self, maze):
+        zero_value_indices = list(zip(*(np.where(maze == 0)[0], np.where(maze == 0)[1])))
+        zero_values_indices_length = range(len(zero_value_indices))
+        random_zero_value_indices = np.random.choice(zero_values_indices_length,
+                                                     size = int(0.5 * len(zero_value_indices)),
+                                                     replace = False)
+
+        for index in random_zero_value_indices:
+            row, column = zero_value_indices[index]
+            maze[row, column] = 1
+
+        # Set the source in the original maze to a open in the new simpler maze
+        maze[0, 0] = 1
+
+        return maze
+
+    def _run_thinning_astar(self, root, dest):
+
+        current_maze_copy = self.environment.maze.copy()
+        simpler_maze = self._create_simpler_maze(maze = current_maze_copy)
+        simpler_env = Environment()
+        simpler_env.generate_maze(new_maze = simpler_maze, n = self.environment.n, p = self.environment.p)
+
+        # Root is at a distance of 0 from itself
+        root.distance_from_source = 0
+
+        self.fringe = Q.PriorityQueue()
+        self.fringe.put(root)
+
+        self.visited.append(root)
+        while self.fringe.queue:
+
+            # Keep track of maximum fringe length
+            fringe_length = len(self.fringe.queue)
+            if fringe_length >= self.max_fringe_length:
+                self.max_fringe_length = fringe_length
+
+            temp_path = []
+            node = self.fringe.get()
+
+            if node not in self.visited:
+                self.visited.append(node)
+
+            node_children = node.get_children(node = node, algorithm = self.algorithm)
+
+            for child in node_children:
+                if child is None or child in self.visited:
+                    continue
+
+                if child not in self.fringe.queue:
+                    child.parent = node
+
+                    temp_simpler_maze = simpler_maze.copy()
+                    temp_simpler_maze[child.row, child.column] = 4
+                    simpler_env.modify_environment(new_maze = temp_simpler_maze)
+
+                    child.distance_from_dest = self._calculate_thinning_heuristic(simpler_maze_env = simpler_env,
+                                                                                  node_row = child.row,
+                                                                                  node_column = child.column)
+                    child.distance_from_source = node.distance_from_source + 1
+                    self.fringe.put(child)
+                else:
+                    if child.get_heuristic() >= node.distance_from_source + child.distance_from_dest:
+                        child.parent = node
+                        child.distance_from_source = node.distance_from_source + 1
+
+            # Get the path through which you reach this node from the root node
+            flag = True
+            temp_node = node
+            while (flag):
+                temp_path.append(temp_node)
+                temp_node = temp_node.parent
+                if temp_node is None:
+                    flag = False
+            temp_path_copy = temp_path.copy()
+
+            # Update the color of the path which we found above by popping the root first and the subsequent nodes.
+            while (len(temp_path) != 0):
+                temp_node = temp_path.pop()
+
+                # Visualisation Parameter added
+                if self.visual == True:
+                    self.environment.update_color_of_cell(temp_node.row, temp_node.column)
+                    self.environment.render_maze(title = self.title)
+
+            # if you reach the destination, then break
+            if (node == dest):
+                break
+
+            # We reset the entire path again to render a new path in the next iteration.
+            while (len(temp_path_copy) != 0):
+                temp_node = temp_path_copy.pop(0)
+
+                # Visualisation Parameter added
+                if self.visual == True:
+                    self.environment.reset_color_of_cell(temp_node.row, temp_node.column)
+                    self.environment.render_maze(title = self.title)
+
     def run_path_finder_algorithm(self):
         if self.algorithm == self.DfsString:
-            self._run_dfs()
+            self._run_dfs(root = self.graph_maze[0, 0],
+                          dest = self.graph_maze[self.environment.n - 1, self.environment.n - 1])
         elif self.algorithm == self.BfsString:
-            self._run_bfs()
+            self._run_bfs(root = self.graph_maze[0, 0],
+                          dest = self.graph_maze[self.environment.n - 1, self.environment.n - 1])
+        elif self.algorithm == self.AStarString:
+            self._run_astar(root = self.graph_maze[0, 0],
+                            dest = self.graph_maze[self.environment.n - 1, self.environment.n - 1])
         else:
-            self._run_astar()
+            self._run_thinning_astar(root = self.graph_maze[0, 0],
+                                     dest = self.graph_maze[self.environment.n - 1, self.environment.n - 1])
 
         # Get the final path
         self._get_final_path()
