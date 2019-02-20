@@ -25,6 +25,7 @@ class Node():
         self.distance_from_dest = distance_from_dest
         self.distance_from_source = distance_from_source
         self.num_nodes_before_this_node = num_nodes_before_this_node
+        self.distance_from_fire = None
 
     def __str__(self):
         return str(self.__dict__)

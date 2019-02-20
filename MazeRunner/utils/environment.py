@@ -42,7 +42,7 @@ class Environment():
         self.graph = Graph(maze = self.maze)
         self.graph.create_graph_from_maze()
 
-    def render_maze(self, title = None, timer = 1):
+    def render_maze(self, title = None, timer = 1e-15):
         # Create a mask for the particular cell and change its color to green
         masked_maze_copy = np.rot90(np.ma.masked_where(self.maze_copy == -1, self.maze_copy), k = 1)
         self.cmap.set_bad(color = 'green')

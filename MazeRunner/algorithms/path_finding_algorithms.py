@@ -6,6 +6,7 @@ class PathFinderAlgorithm():
     DfsString = "dfs"
     BfsString = "bfs"
     AStarString = "astar"
+    FireString = "firealgo"
 
     def __init__(self, environment = None, algorithm = None, visual = False, heuristic = None):
         self.environment = environment
@@ -38,6 +39,26 @@ class PathFinderAlgorithm():
 
     def _get_manhattan_distance(self, node, dest):
         return np.abs(node.row - dest.row) + np.abs(node.column - dest.column)
+
+    def _get_fire_distance(self, node):
+        fire_blocks = np.argwhere(self.environment.maze_copy == 3)
+        all_that_is_burning = []
+
+        for i in zip(fire_blocks):
+            all_that_is_burning.append(tuple((i[0][0], i[0][1])))
+
+        time_taken_to_die = []
+
+        for i in all_that_is_burning:
+            temp = np.sqrt((node.row - i[0])**2 + (node.column - i[1])**2)
+            time_taken_to_die.append(temp)
+
+        time_before_i_call_fire_engine = min(time_taken_to_die)
+
+        alpha_val = -0.5
+
+        return (alpha_val * time_before_i_call_fire_engine)
+
 
     def get_final_path_length(self):
         return len(self.path)
@@ -73,37 +94,6 @@ class PathFinderAlgorithm():
             # update color of the cell and render the maze
             if self.visual == True :            #Added visualisation parameter
                 self.environment.update_color_of_cell(node.row, node.column)
-                #fire_blocks = self.environment.maze_copy[self.environment.maze_copy == 3]
-
-                fire_blocks = np.argwhere(self.environment.maze_copy == 3)
-                i_curr_burn = []
-
-                for i in zip(fire_blocks):
-                    i_curr_burn.append(tuple((i[0][0], i[0][1])))
-
-                for i in i_curr_burn:
-                    curr = self.environment.graph.graph_maze[i[0], i[1]]
-                    fire_kids = curr.get_children(node = curr, algorithm = self.algorithm)
-
-                    fire_grandkids = []
-
-                    for beta in fire_kids:
-                        if beta is None:
-                            continue
-
-                        every_kid = beta.get_children(node = beta, algorithm = self.algorithm)
-
-                        k = 0
-                        for kid in every_kid:
-                            if kid is None:
-                                continue
-                            if kid.value == 3:
-                                k += 1
-                                # print(k)
-                        val = np.random.choice(2, 1, [(0.5**k, 1 - (0.5**k))])
-                        if val[0] == 1:
-                            self.environment.wild_fire(beta.row, beta.column)
-
                 self.environment.render_maze()
 
             # if you reach the destination, then break
@@ -284,11 +274,128 @@ class PathFinderAlgorithm():
                     self.environment.reset_color_of_cell(temp_node.row, temp_node.column)
                     self.environment.render_maze()
 
+
+    def _charizard(self):
+
+        fire_blocks = np.argwhere(self.environment.maze_copy == 3)
+        i_curr_burn = []
+
+        for i in zip(fire_blocks):
+            i_curr_burn.append(tuple((i[0][0], i[0][1])))
+
+        for i in i_curr_burn:
+            curr = self.environment.graph.graph_maze[i[0], i[1]]
+            fire_kids = curr.get_children(node = curr, algorithm = self.algorithm)
+
+            fire_grandkids = []
+
+            for beta in fire_kids:
+                if beta is None:
+                    continue
+
+                every_kid = beta.get_children(node = beta, algorithm = self.algorithm)
+
+                k = 0
+                for kid in every_kid:
+                    if kid is None:
+                        continue
+                    if kid.value == 3:
+                        k += 1
+                val = np.random.choice(2, 1, [(0.5**k, 1 - (0.5**k))])
+                if val[0] == 1:
+                    self.environment.wild_fire(beta.row, beta.column)
+
+
+    def _run_from_fire(self):
+        root = self.graph_maze[0, 0]
+        dest = self.graph_maze[self.environment.n - 1, self.environment.n - 1]
+
+        # Assign distance from each node to the destination
+        for row in range(len(self.environment.maze)):
+            for column in range(len(self.environment.maze)):
+                if self.environment.maze[row, column] == 0:
+                    continue
+                self.graph_maze[row, column].distance_from_dest = self._get_euclidien_distance(
+                    self.graph_maze[row, column], dest)
+
+        self.fringe = Q.PriorityQueue()
+        self.fringe.put(root)
+        self.visited.append(root)
+        while self.fringe.queue:
+            node = self.fringe.get()
+
+            if node not in self.visited:
+                self.visited.append(node)
+
+            min_val = [node, 10000]
+
+            # # Get the path through which you reach this node from the root node
+            # flag = True
+            # temp_node = node
+            # while (flag):
+            #     temp_path.append(temp_node)
+            #     temp_node = temp_node.parent
+            #     if temp_node is None:
+            #         flag = False
+            # temp_path_copy = temp_path.copy()
+            #
+            # # Update the color of the path which we found above by popping the root first and the subsequent nodes.
+            # while (len(temp_path) != 0):
+            #     temp_node = temp_path.pop()
+            #
+            #     # Visualisation Parameter added
+            #     if self.visual == True:
+            #         self.environment.update_color_of_cell(temp_node.row, temp_node.column)
+            #         if called == 1:
+            #             self._charizard()
+            #             called = 0
+            #         self.environment.render_maze()
+
+            # update color of the cell and render the maze
+            if self.visual == True :            #Added visualisation parameter
+                self.environment.update_color_of_cell(node.row, node.column)
+                self._charizard()
+                self.environment.render_maze()
+
+            # if you reach the destination, then break
+            if (node == dest):
+                break
+
+            flag = True
+            while(flag):
+                node_children = [node.right, node.down, node.left, node.up]
+                unvisited_children = self._get_unvisited_children(node_children)
+
+                # If no unvisited children found, then reset the color of this cell in the current path
+                # because there is no further path from this cell.
+                if len(unvisited_children) == 0:
+                    if self.visual == True:         #Added visualisation parameter --Nitin & Vedant
+                        self.environment.reset_color_of_cell(node.row, node.column)
+                        self.environment.render_maze()
+                else:
+                    for child in unvisited_children:
+                        child.parent = node
+                        child_possible_value = child.distance_from_dest + self._get_fire_distance(child)
+
+                        if child_possible_value <= min_val[1]:
+                            min_val[1] = child_possible_value
+                            min_val[0] = child
+
+                    flag = False
+
+                node = node.parent
+                if node is None:
+                    flag = False
+
+            node = min_val[0]
+
     def run_path_finder_algorithm(self):
         if self.algorithm == self.DfsString:
             self._run_dfs()
         elif self.algorithm == self.BfsString:
             self._run_bfs()
+        elif self.algorithm == self.FireString:
+            self._run_from_fire()
         else:
             self._run_astar()
 
@@ -307,4 +414,4 @@ class PathFinderAlgorithm():
 
         # Display the final highlighted path
         if self.visual == True:
-            self.environment.render_maze(timer = 0.1)
+            self.environment.render_maze(timer = 1e-15)
