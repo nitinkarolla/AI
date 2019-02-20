@@ -63,7 +63,7 @@ if __name__ == "__main__":
     parser.add_argument("-p", "--probability_of_obstacles", default = 0.2)
     parser.add_argument('-algo', "--path_finding_algorithm", default = "dfs")
     parser.add_argument('-v', "--visual", default = False)
-    parser.add_argument('-he', "--heuristic", default = "edit")
+    parser.add_argument('-he', "--heuristic", default = "euclid")
     parser.add_argument('-f', "--fire", default = False)
     args = parser.parse_args(sys.argv[1:])
 

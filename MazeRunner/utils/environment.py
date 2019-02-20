@@ -29,7 +29,15 @@ class Environment():
         self.cmap = colors.ListedColormap(['black', 'white', 'grey', 'orange', 'red'])
         self.norm = colors.BoundaryNorm(boundaries = [0, 1, 2, 3, 4], ncolors = 4)
 
-    def generate_maze(self):
+    def generate_maze(self, new_maze = None):
+    
+        if new_maze is not None:
+            self.maze = new_maze
+            self.original_maze = self.maze.copy()
+            self.maze_copy = self.maze.copy()
+            self.create_graph_from_maze()
+            return
+          
         self.maze = np.array([list(np.random.binomial(1, 1 - self.p, self.n)) for _ in range(self.n)])
         self.maze[0, 0] = 4
         self.maze[self.n - 1, self.n - 1] = 4
@@ -50,7 +58,8 @@ class Environment():
         self.graph = Graph(maze = self.maze, algorithm = self.algorithm)
         self.graph.create_graph_from_maze()
 
-    def render_maze(self, title = None, timer = 1e-15):
+    def render_maze(self, title = None, timer = 1e-5):
+      
         # Create a mask for the particular cell and change its color to green
         masked_maze_copy = np.rot90(np.ma.masked_where(self.maze_copy == -1, self.maze_copy), k = 1)
         self.cmap.set_bad(color = 'green')
@@ -95,12 +104,12 @@ class Environment():
         plt.savefig(image_path)
 
     def update_color_of_cell(self, row, column):
-        if (row == 0 and column == 0) or (row == self.n - 1 and column == self.n - 1):
+        if self.maze[row, column] == 4:
             return
         self.maze_copy[row, column] = -1
 
     def reset_color_of_cell(self, row, column):
-        if (row == 0 and column == 0) or (row == self.n - 1 and column == self.n - 1):
+        if self.maze[row, column] == 4:
             return
         self.maze_copy[row, column] = 2
 
@@ -115,18 +124,16 @@ class Environment():
         self.create_graph_from_maze()
 
     def modify_environment(self, row = None, column = None, new_maze = None):
-
+      
         if new_maze is not None:
             self.maze = new_maze
-            self.maze_copy = self.maze.copy()
-            self.create_graph_from_maze()
-            return
-
-        # If the cell's value is 1 change it to 0 and vice-versa
-        if self.maze[row, column] == 0:
-            self.maze[row, column] = 1
         else:
-            self.maze[row, column] = 0
+
+            # If the cell's value is 1 change it to 0 and vice-versa
+            if self.maze[row, column] == 0:
+                self.maze[row, column] = 1
+            else:
+                self.maze[row, column] = 0
 
         # Update copy of maze
         self.maze_copy = self.maze.copy()
