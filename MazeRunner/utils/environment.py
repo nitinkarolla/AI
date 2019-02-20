@@ -72,6 +72,28 @@ class Environment():
         plt.title(title)
         plt.pause(timer)
 
+    def plot_maze(self, title = None, image_path = None):
+        # Create a mask for the particular cell and change its color to green
+        masked_maze_copy = np.rot90(np.ma.masked_where(self.maze_copy == -1, self.maze_copy), k = 9)
+        self.cmap.set_bad(color = 'green')
+
+        # Plot the new maze
+        if self.colormesh is None:
+            self.colormesh = plt.pcolor(masked_maze_copy,
+                                        cmap = self.cmap,
+                                        norm = self.norm,
+                                        edgecolor = 'k',
+                                        linewidth = 0.5,
+                                        antialiased = False)
+        else:
+            self.colormesh.set_array(masked_maze_copy.ravel())
+        plt.xticks([])
+        plt.yticks([])
+        plt.ion()
+        #plt.show()
+        plt.title(title)
+        plt.savefig(image_path)
+
     def update_color_of_cell(self, row, column):
         if (row == 0 and column == 0) or (row == self.n - 1 and column == self.n - 1):
             return
