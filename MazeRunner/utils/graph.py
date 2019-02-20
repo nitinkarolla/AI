@@ -3,8 +3,9 @@ from MazeRunner.utils.node import Node
 
 
 class Graph():
-    def __init__(self, maze = None):
+    def __init__(self, maze = None, algorithm = None):
         self.maze = maze
+        self.algorithm = algorithm
         self.graph_maze = np.empty(shape = self.maze.shape, dtype = object)
 
     def create_graph_from_maze(self):
@@ -12,7 +13,10 @@ class Graph():
             for column in range(len(self.maze)):
                 if self.maze[row, column] == 0:
                     continue
-                self.graph_maze[row, column] = Node(value = self.maze[row, column], row = row, column = column)
+                self.graph_maze[row, column] = Node(value = self.maze[row, column],
+                                                    row = row,
+                                                    column = column,
+                                                    algorithm = self.algorithm)
 
         # Left
         for row in range(len(self.maze)):

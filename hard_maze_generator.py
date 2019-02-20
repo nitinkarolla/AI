@@ -14,7 +14,8 @@ class HardMazeGenerator():
                  metric = "path",
                  heuristic = None,
                  max_iterations = 100,
-                 visual = True):
+                 visual = True,
+                 fire = False):
         self.maze_dimension = maze_dimension
         self.probability_of_obstacles = probability_of_obstacles
         self.algorithm = algorithm
@@ -24,6 +25,7 @@ class HardMazeGenerator():
         self.max_iterations = max_iterations
         self.image_path = os.curdir + '/output/hard_maze/' + os.sep + self.algorithm + \
                           os.sep + str(self.maze_dimension) + '_' + str(self.probability_of_obstacles)
+        self.fire = fire
 
     def run(self):
         # os.makedirs(self.image_path, exist_ok = True)
@@ -32,7 +34,8 @@ class HardMazeGenerator():
                                  probability_of_obstacles = self.probability_of_obstacles,
                                  algorithm = self.algorithm,
                                  visual = self.visual,
-                                 heuristic = self.heuristic)
+                                 heuristic = self.heuristic,
+                                 fire = self.fire)
 
 
         self.global_difficult_maze = None
@@ -67,7 +70,7 @@ class HardMazeGenerator():
                         if maze_runner.path_finder.get_final_path_length() == 1 :
                             maze_runner.env.reset_environment()
                             continue
-                        
+
                         if self.metric == "path":
                             if maze_runner.path_finder.get_final_path_length() > current_difficult_maze_metric:
                                 current_difficult_maze_metric = maze_runner.path_finder.get_final_path_length()
@@ -96,7 +99,7 @@ class HardMazeGenerator():
 
             # Stopping criteria design
             iteration_count = iteration_count + 1
-         
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description = 'generate hard mazes')
     parser.add_argument("-n", "--maze_dimension", default = 10)
@@ -114,19 +117,7 @@ if __name__ == "__main__":
                                   visual = bool(args.visual),
                                   max_iterations = int(args.max_iterations),
                                   metric = args.metric,
-                                  heuristic = args.heuristic)
+                                  heuristic = args.heuristic,
+                                  fire = False)
 
     hard_maze.run()
-
-
-
-
-
-
-
-
-
-
-
-
-
