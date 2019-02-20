@@ -1,6 +1,5 @@
 import numpy as np
 import queue as Q
-from copy import deepcopy, copy
 
 
 class PathFinderAlgorithm():
@@ -326,75 +325,6 @@ class PathFinderAlgorithm():
             child.distance_from_fire = self._get_fire_distance(child)
 
     def _run_from_fire(self):
-
-        # root = self.graph_maze[0, 0]
-        # dest = self.graph_maze[self.environment.n - 1, self.environment.n - 1]
-        #
-        # # Assign distance from each node to the destination
-        # for row in range(len(self.environment.maze)):
-        #     for column in range(len(self.environment.maze)):
-        #         if self.environment.maze[row, column] == 0:
-        #             continue
-        #         self.graph_maze[row, column].distance_from_dest = self._get_euclidien_distance(
-        #             self.graph_maze[row, column], dest)
-        #
-        # self.fringe = Q.PriorityQueue()
-        # self.fringe.put(root)
-        # self.visited.append(root)
-        # prev_node = None
-        # while self.fringe:
-        #
-        #     node = self.fringe.get()
-        #
-        #     if prev_node is not None:
-        #         while(prev_node != node.parent):
-        #             self.environment.reset_color_of_cell(prev_node.row, prev_node.column)
-        #             self.environment.render_maze()
-        #             prev_node = prev_node.parent
-        #             if prev_node is None:
-        #                 break
-        #
-        #     # update color of the cell and render the maze
-        #     if self.visual == True:
-        #         self.environment.update_color_of_cell(node.row, node.column)
-        #         # self._charizard()
-        #         self.environment.render_maze(timer = 0.01)
-        #
-        #     # if you reach the destination, then break
-        #     if (node == dest):
-        #         break
-        #
-        #     if node not in self.visited:
-        #         self.visited.append(node)
-        #
-        #     # If there is no further path, then reset the color of the cell. Also, subsequently reset
-        #     # the color of all parent cells along the path who have no other children to explore.
-        #     flag = True
-        #     while (flag):
-        #         node_children = node.get_children(node = node, algorithm = self.algorithm)
-        #         unvisited_children = self._get_unvisited_children(node_children)
-        #
-        #         # If no unvisited children found, then reset the color of this cell in the current path
-        #         # because there is no further path from this cell.
-        #         if len(unvisited_children) == 0:
-        #             if self.visual == True:  # Added visualisation parameter --Nitin & Vedant
-        #                 self.environment.reset_color_of_cell(node.row, node.column)
-        #                 self.environment.render_maze(timer = 0.01)
-        #         else:
-        #             for child in unvisited_children:
-        #                 child.parent = node
-        #                 child.distance_from_fire = self._get_fire_distance(child)
-        #                 self.fringe.put(child)
-        #
-        #             prev_node = node
-        #             break
-        #
-        #         # prev_node = node
-        #         node = node.parent
-        #         if node is None:
-        #             break
-        #
-        #     self._update_fire_heuristic()
 
         root = self.graph_maze[0, 0]
         dest = self.graph_maze[self.environment.n - 1, self.environment.n - 1]
