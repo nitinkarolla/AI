@@ -1,7 +1,6 @@
 import numpy as np
 import queue as Q
 from MazeRunner.utils.environment import Environment
-from sklearn.tree import DecisionTreeClassifier
 
 
 class PathFinderAlgorithm():
@@ -348,8 +347,8 @@ class PathFinderAlgorithm():
 
         current_maze_copy = self.environment.maze.copy()
         simpler_maze = self._create_simpler_maze(maze = current_maze_copy)
-        simpler_env = Environment()
-        simpler_env.generate_maze(new_maze = simpler_maze, n = self.environment.n, p = self.environment.p)
+        simpler_env = Environment(n = self.environment.n, p = self.environment.p)
+        simpler_env.generate_maze(new_maze = simpler_maze)
 
         # Root is at a distance of 0 from itself
         root.distance_from_source = 0
