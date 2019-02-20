@@ -4,51 +4,33 @@ from time import time
 import matplotlib
 matplotlib.use("TkAgg")
 import matplotlib.pyplot as plt
-from MazeRunner.utils.graph import Graph
 from MazeRunner.utils.environment import Environment
 from MazeRunner.algorithms.path_finding_algorithms import PathFinderAlgorithm
 
 
 class MazeRunner():
 
-    def __init__(self, maze_dimension, probability_of_obstacles, algorithm, visual, heuristic):
+    def __init__(self, maze_dimension, probability_of_obstacles, algorithm, visual, heuristic, fire):
         self.algorithm = algorithm
         self.maze_dimension = maze_dimension
         self.probability_of_obstacles = probability_of_obstacles
         self.visual = visual
         self.heuristic = heuristic
+        self.fire = fire
 
     def create_environment(self):
 
         # Create the maze
-        self.env = Environment()
-        self.env.generate_maze(n = self.maze_dimension, p = self.probability_of_obstacles)
+        self.env = Environment(algorithm = self.algorithm, n = self.maze_dimension, p = self.probability_of_obstacles, fire = self.fire)
+        self.env.generate_maze()
 
         # Generate graph from the maze
-        self.create_graph_from_maze()
-
-    def modify_environment(self, row, column):
-
-        # Modify the current maze environment
-        self.env.modify_environment(row, column)
-
-        # Generate graph from the new maze
-        self.create_graph_from_maze()
-
-    def create_graph_from_maze(self):
-
-        # Generate graph from an environment
-        self.graph = Graph(environment = self.env)
-        self.graph.create_graph_from_maze()
-
-    def reset_environment(self):
-        self.env.reset_environment()
-        self.create_graph_from_maze()
+        self.env.create_graph_from_maze()
 
     def run(self):
 
         # Run the path finding algorithm on the graph
-        self.path_finder = PathFinderAlgorithm(graph = self.graph,
+        self.path_finder = PathFinderAlgorithm(environment = self.env,
                                                algorithm = self.algorithm,
                                                visual = self.visual,
                                                heuristic = self.heuristic)
@@ -82,14 +64,15 @@ if __name__ == "__main__":
     parser.add_argument('-algo', "--path_finding_algorithm", default = "dfs")
     parser.add_argument('-v', "--visual", default = False)
     parser.add_argument('-he', "--heuristic", default = "edit")
+    parser.add_argument('-f', "--fire", default = False)
     args = parser.parse_args(sys.argv[1:])
 
     maze_runner = MazeRunner(maze_dimension = int(args.maze_dimension),
                              probability_of_obstacles = float(args.probability_of_obstacles),
                              algorithm = args.path_finding_algorithm,
                              visual = bool(args.visual),
-                             heuristic = args.heuristic)
+                             heuristic = args.heuristic,
+                             fire = args.fire)
 
     maze_runner.create_environment()
-    # maze_runner.find_solvable_map_size()
     maze_runner.run()

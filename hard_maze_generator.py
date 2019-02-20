@@ -14,14 +14,17 @@ class HardMazeGenerator():
                  metric = "path",
                  heuristic = None,
                  max_iterations = 100,
-                 visual = False):
+                 visual = False,
+                 fire = False):
         self.maze_dimension = maze_dimension
+        self.fire = fire
         self.probability_of_obstacles = probability_of_obstacles
         self.algorithm = algorithm
         self.metric = metric
         self.visual = visual
         self.heuristic = heuristic
         self.max_iterations = max_iterations
+
         self.image_path = os.curdir + '/output/hard_maze' + "/" + self.algorithm + \
                             "/" + self.metric + "/" + str(self.maze_dimension) + '_' +\
                             str(self.probability_of_obstacles)
@@ -34,7 +37,8 @@ class HardMazeGenerator():
                                  probability_of_obstacles = self.probability_of_obstacles,
                                  algorithm = self.algorithm,
                                  visual = self.visual,
-                                 heuristic = self.heuristic)
+                                 heuristic = self.heuristic,
+                                 fire = self.fire)
 
 
         self.global_difficult_maze = None
@@ -66,13 +70,13 @@ class HardMazeGenerator():
                             continue
 
                         # Store the values of Maximum Difficult metric and the maze
-                        maze_runner.modify_environment(row = i, column = j)
+                        maze_runner.env.modify_environment(row = i, column = j)
                         maze_runner.run()
 
                         if maze_runner.path_finder.get_final_path_length() == 1 :
-                            maze_runner.reset_environment()
+                            maze_runner.env.reset_environment()
                             continue
-                        
+
                         if self.metric == "path":
                             if maze_runner.path_finder.get_final_path_length() > current_difficult_maze_metric:
                                 current_difficult_maze_metric = maze_runner.path_finder.get_final_path_length()
@@ -92,16 +96,14 @@ class HardMazeGenerator():
                                 filename = self.image_path + os.sep + "master" + "_" + str(iteration_count) +"_"+ str(i) + "_" + str(j)
                                 #maze_runner.env.plot_maze(image_path = filename)
 
-                        maze_runner.reset_environment()
+                        maze_runner.env.reset_environment()
 
                 if np.array_equal(current_difficult_maze, parent_maze):
                     break
                 else:
                     parent_maze = current_difficult_maze.copy()
-                    maze_runner.env.maze = parent_maze.copy()
-                    maze_runner.env.original_maze = parent_maze.copy()
-                    maze_runner.env.maze_copy = maze_runner.env.maze.copy()
-                    maze_runner.create_graph_from_maze()
+                    maze_runner.env.modify_environment(new_maze = parent_maze.copy())
+                    maze_runner.env.set_original_maze(new_maze = parent_maze.copy())
 
             if self.global_difficult_maze_metric < current_difficult_maze_metric:
                 self.global_difficult_maze_metric = current_difficult_maze_metric
@@ -110,7 +112,7 @@ class HardMazeGenerator():
                 maze_runner.env.plot_maze(image_path = filename)
             # Stopping criteria design
             iteration_count = iteration_count + 1
-         
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description = 'generate hard mazes')
     parser.add_argument("-n", "--maze_dimension", default = 10)
@@ -128,20 +130,6 @@ if __name__ == "__main__":
                                   visual = bool(args.visual),
                                   max_iterations = int(args.max_iterations),
                                   metric = args.metric,
-                                  heuristic = args.heuristic)
-
-    #hard_maze = HardMazeGenerator()
+                                  heuristic = args.heuristic,
+                                  fire = False)
     hard_maze.run()
-
-
-
-
-
-
-
-
-
-
-
-
-

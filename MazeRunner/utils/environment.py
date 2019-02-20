@@ -2,28 +2,40 @@ import matplotlib
 matplotlib.use('tkAgg')
 from pylab import *
 from matplotlib import colors
+from MazeRunner.utils.graph import Graph
 
 
 class Environment():
     ProbabilityOfBlockedMaze = 0.4
     DimensionOfMaze = 10
 
-    def __init__(self):
-        self.maze = None
-        self.maze_copy = None
-        self.colormesh = None
-
-        # The default colormap of our maze - 0: Black, 1: White, 2: Grey
-        self.cmap = colors.ListedColormap(['black', 'white', 'grey', 'red'])
-        self.norm = colors.BoundaryNorm(boundaries = [0, 1, 2, 3, 4], ncolors = 4)
-
-    def generate_maze(self, n = DimensionOfMaze, p = ProbabilityOfBlockedMaze):
+    def __init__(self,
+                 n = DimensionOfMaze,
+                 p = ProbabilityOfBlockedMaze,
+                 fire = None,
+                 algorithm = None,
+                 maze = None,
+                 maze_copy = None,
+                 colormesh = None):
         self.n = n
         self.p = p
+        self.algorithm = algorithm
+        self.maze = maze
+        self.maze_copy = maze_copy
+        self.colormesh = colormesh
+        self.fire = fire
 
-        self.maze = np.array([list(np.random.binomial(1, 1 - p, n)) for _ in range(n)])
+        # The default colormap of our maze - 0: Black, 1: White, 2: Grey
+        self.cmap = colors.ListedColormap(['black', 'white', 'grey', 'orange', 'red'])
+        self.norm = colors.BoundaryNorm(boundaries = [0, 1, 2, 3, 4], ncolors = 4)
+
+    def generate_maze(self):
+        self.maze = np.array([list(np.random.binomial(1, 1 - self.p, self.n)) for _ in range(self.n)])
         self.maze[0, 0] = 4
-        self.maze[n-1, n-1] = 4
+        self.maze[self.n - 1, self.n - 1] = 4
+
+        if self.fire:
+            self.maze[self.n - 1, 0] = 3
 
         # This will be the original maze
         self.original_maze = self.maze.copy()
@@ -31,9 +43,16 @@ class Environment():
         # Create a copy of maze to render and update
         self.maze_copy = self.maze.copy()
 
-    def render_maze(self, title = None, timer = 1e-10):
+    def set_original_maze(self, new_maze):
+        self.original_maze = new_maze
+
+    def create_graph_from_maze(self):
+        self.graph = Graph(maze = self.maze, algorithm = self.algorithm)
+        self.graph.create_graph_from_maze()
+
+    def render_maze(self, title = None, timer = 1e-15):
         # Create a mask for the particular cell and change its color to green
-        masked_maze_copy = np.rot90(np.ma.masked_where(self.maze_copy == -1, self.maze_copy), k = 9)
+        masked_maze_copy = np.rot90(np.ma.masked_where(self.maze_copy == -1, self.maze_copy), k = 1)
         self.cmap.set_bad(color = 'green')
 
         # Plot the new maze
@@ -85,12 +104,24 @@ class Environment():
             return
         self.maze_copy[row, column] = 2
 
+    def wild_fire(self, row, column):
+        if (row == 0 and column == 0) or (row == self.n - 1 and column == self.n - 1):
+            return
+        self.maze_copy[row, column] = 3
+
     def reset_environment(self):
         self.maze = self.original_maze.copy()
         self.maze_copy = self.maze.copy()
+        self.create_graph_from_maze()
 
-    def modify_environment(self, row, column):
-            
+    def modify_environment(self, row = None, column = None, new_maze = None):
+
+        if new_maze is not None:
+            self.maze = new_maze
+            self.maze_copy = self.maze.copy()
+            self.create_graph_from_maze()
+            return
+
         # If the cell's value is 1 change it to 0 and vice-versa
         if self.maze[row, column] == 0:
             self.maze[row, column] = 1
@@ -99,4 +130,4 @@ class Environment():
 
         # Update copy of maze
         self.maze_copy = self.maze.copy()
-
+        self.create_graph_from_maze()
