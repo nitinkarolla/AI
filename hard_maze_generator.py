@@ -14,7 +14,7 @@ class HardMazeGenerator():
                  metric = "path",
                  heuristic = None,
                  max_iterations = 100,
-                 visual = True):
+                 visual = False):
         self.maze_dimension = maze_dimension
         self.probability_of_obstacles = probability_of_obstacles
         self.algorithm = algorithm
@@ -22,11 +22,13 @@ class HardMazeGenerator():
         self.visual = visual
         self.heuristic = heuristic
         self.max_iterations = max_iterations
-        self.image_path = os.curdir + '/output/hard_maze/' + os.sep + self.algorithm + \
-                          os.sep + str(self.maze_dimension) + '_' + str(self.probability_of_obstacles)
+        self.image_path = os.curdir + '/output/hard_maze' + "/" + self.algorithm + \
+                            "/" + self.metric + "/" + str(self.maze_dimension) + '_' +\
+                            str(self.probability_of_obstacles)
 
     def run(self):
-        # os.makedirs(self.image_path, exist_ok = True)
+
+        os.makedirs(self.image_path, exist_ok = True)
 
         maze_runner = MazeRunner(maze_dimension = self.maze_dimension,
                                  probability_of_obstacles = self.probability_of_obstacles,
@@ -47,6 +49,9 @@ class HardMazeGenerator():
                 iteration_count = iteration_count + 1
                 continue
 
+            filename = self.image_path +os.sep + "master" + "_" + str(iteration_count) + ".png"
+            #maze_runner.env.plot_maze(image_path = filename)
+            
             current_difficult_maze = maze_runner.env.maze.copy()
             current_difficult_maze_metric = maze_runner.path_finder.get_final_path_length()
             parent_maze = current_difficult_maze.copy()
@@ -72,14 +77,20 @@ class HardMazeGenerator():
                             if maze_runner.path_finder.get_final_path_length() > current_difficult_maze_metric:
                                 current_difficult_maze_metric = maze_runner.path_finder.get_final_path_length()
                                 current_difficult_maze = maze_runner.env.maze.copy()
+                                filename = self.image_path + os.sep + "mater" + "_" + str(iteration_count) +"_"+ str(i) + "_" + str(j)
+                                #maze_runner.env.plot_maze(image_path = filename)
                         elif self.metric == "memory":
                             if maze_runner.path_finder.get_maximum_fringe_length() > current_difficult_maze_metric:
                                 current_difficult_maze_metric = maze_runner.path_finder.get_maximum_fringe_length()
                                 current_difficult_maze = maze_runner.env.maze.copy()
+                                filename = self.image_path + os.sep + "master" + "_" + str(iteration_count) +"_"+ str(i) + "_" + str(j)
+                                #maze_runner.env.plot_maze(image_path = filename)
                         elif self.metric == "nodes":
                             if maze_runner.path_finder.get_number_of_nodes_expanded() > current_difficult_maze_metric:
                                 current_difficult_maze_metric = maze_runner.path_finder.get_number_of_nodes_expanded()
                                 current_difficult_maze = maze_runner.env.maze.copy()
+                                filename = self.image_path + os.sep + "master" + "_" + str(iteration_count) +"_"+ str(i) + "_" + str(j)
+                                #maze_runner.env.plot_maze(image_path = filename)
 
                         maze_runner.reset_environment()
 
@@ -95,7 +106,8 @@ class HardMazeGenerator():
             if self.global_difficult_maze_metric < current_difficult_maze_metric:
                 self.global_difficult_maze_metric = current_difficult_maze_metric
                 self.global_difficult_maze = current_difficult_maze.copy()
-
+                filename = self.image_path + os.sep + "master" + "_" + "hard" + "_" + str(iteration_count) +"_" +str(self.global_difficult_maze_metric)
+                maze_runner.env.plot_maze(image_path = filename)
             # Stopping criteria design
             iteration_count = iteration_count + 1
          
@@ -118,7 +130,7 @@ if __name__ == "__main__":
                                   metric = args.metric,
                                   heuristic = args.heuristic)
 
-    # hard_maze = HardMazeGenerator()
+    #hard_maze = HardMazeGenerator()
     hard_maze.run()
 
 
