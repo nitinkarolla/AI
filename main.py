@@ -10,18 +10,19 @@ from MazeRunner.algorithms.path_finding_algorithms import PathFinderAlgorithm
 
 class MazeRunner():
 
-    def __init__(self, maze_dimension, probability_of_obstacles, algorithm, visual, heuristic):
+    def __init__(self, maze_dimension, probability_of_obstacles, algorithm, visual, heuristic, fire):
         self.algorithm = algorithm
         self.maze_dimension = maze_dimension
         self.probability_of_obstacles = probability_of_obstacles
         self.visual = visual
         self.heuristic = heuristic
+        self.fire = fire
 
     def create_environment(self):
 
         # Create the maze
-        self.env = Environment()
-        self.env.generate_maze(n = self.maze_dimension, p = self.probability_of_obstacles)
+        self.env = Environment(algorithm = self.algorithm, n = self.maze_dimension, p = self.probability_of_obstacles, fire = self.fire)
+        self.env.generate_maze()
 
         # Generate graph from the maze
         self.env.create_graph_from_maze()
@@ -63,13 +64,15 @@ if __name__ == "__main__":
     parser.add_argument('-algo', "--path_finding_algorithm", default = "dfs")
     parser.add_argument('-v', "--visual", default = False)
     parser.add_argument('-he', "--heuristic", default = "euclid")
+    parser.add_argument('-f', "--fire", default = False)
     args = parser.parse_args(sys.argv[1:])
 
     maze_runner = MazeRunner(maze_dimension = int(args.maze_dimension),
                              probability_of_obstacles = float(args.probability_of_obstacles),
                              algorithm = args.path_finding_algorithm,
                              visual = bool(args.visual),
-                             heuristic = args.heuristic)
+                             heuristic = args.heuristic,
+                             fire = args.fire)
 
     maze_runner.create_environment()
     maze_runner.run()
