@@ -13,6 +13,7 @@ class Node():
                  parent = None,
                  distance_from_dest = None,
                  distance_from_source = np.inf,
+                 distance_from_fire = None,
                  num_nodes_before_this_node = None):
         self.value = value
         self.row = row
@@ -24,6 +25,7 @@ class Node():
         self.down = down
         self.distance_from_dest = distance_from_dest
         self.distance_from_source = distance_from_source
+        self.distance_from_fire = distance_from_fire
         self.num_nodes_before_this_node = num_nodes_before_this_node
         self.distance_from_fire = None
 
@@ -37,15 +39,17 @@ class Node():
         return self.__dict__ != other.__dict__
 
     def __lt__(self, other):
-        selfPriority = self.distance_from_source + self.distance_from_dest
-        otherPriority = other.distance_from_source + other.distance_from_dest
+        selfPriority = self.distance_from_fire + self.distance_from_dest
+        otherPriority = other.distance_from_fire + other.distance_from_dest
         return selfPriority <= otherPriority
 
     def get_heuristic(self):
-        return (self.distance_from_source + self.distance_from_dest)
+        return (self.distance_from_fire + self.distance_from_dest)
 
     def get_children(self, node, algorithm):
         if algorithm == 'dfs':
             return [node.left, node.up, node.down, node.right]
-        else:
+        elif algorithm == 'bfs':
             return [node.right, node.down, node.up, node.left]
+        else:
+            return [node.left, node.up, node.down, node.right]
