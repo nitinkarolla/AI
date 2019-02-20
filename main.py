@@ -6,7 +6,6 @@ matplotlib.use("TkAgg")
 import matplotlib.pyplot as plt
 from MazeRunner.utils.environment import Environment
 from MazeRunner.algorithms.path_finding_algorithms import PathFinderAlgorithm
-from sklearn.tree import DecisionTreeClassifier
 
 
 class MazeRunner():
@@ -72,13 +71,5 @@ if __name__ == "__main__":
                              visual = bool(args.visual),
                              heuristic = args.heuristic)
 
-    # maze_runner = MazeRunner(maze_dimension = 4,
-    #                          probability_of_obstacles = 0.2,
-    #                          algorithm = "thin_astar",
-    #                          visual = False,
-    #                          heuristic = "euclid")
-
-    tree = DecisionTreeClassifier(criterion = "entropy")
-    tree.fit()
     maze_runner.create_environment()
     maze_runner.run()
