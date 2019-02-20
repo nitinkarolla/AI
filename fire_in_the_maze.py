@@ -2,6 +2,7 @@ import argparse
 import sys
 from main import MazeRunner
 
+
 class FireMaze():
 
     def __init__(self, maze_dimension, probability_of_obstacles, algorithm, visual, heuristic, fire):
@@ -21,7 +22,6 @@ class FireMaze():
                                  fire = self.fire)
 
         maze_runner.create_environment()
-        # maze_runner.find_solvable_map_size()
         maze_runner.run()
 
 if __name__ == "__main__":
@@ -40,11 +40,4 @@ if __name__ == "__main__":
                              visual = bool(args.visual),
                              heuristic = args.heuristic,
                              fire = args.fire)
-
-    # fire_maze = FireMaze(maze_dimension = 20,
-    #                      probability_of_obstacles = 0.22,
-    #                      algorithm = "firealgo",
-    #                      visual = True,
-    #                      heuristic = "euclid",
-    #                      fire = True)
     fire_maze.run()

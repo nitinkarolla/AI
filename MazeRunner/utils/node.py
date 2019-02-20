@@ -3,6 +3,7 @@ import numpy as np
 
 class Node():
     def __init__(self,
+                 algorithm = None,
                  value = None,
                  row = None,
                  column = None,
@@ -15,6 +16,7 @@ class Node():
                  distance_from_source = np.inf,
                  distance_from_fire = None,
                  num_nodes_before_this_node = None):
+        self.algorithm = algorithm
         self.value = value
         self.row = row
         self.column = column
@@ -39,12 +41,19 @@ class Node():
         return self.__dict__ != other.__dict__
 
     def __lt__(self, other):
-        selfPriority = self.distance_from_fire + self.distance_from_dest
-        otherPriority = other.distance_from_fire + other.distance_from_dest
+        if self.algorithm == "firealgo":
+            selfPriority = self.distance_from_fire + self.distance_from_dest
+            otherPriority = other.distance_from_fire + other.distance_from_dest
+        else:
+            selfPriority = self.distance_from_source + self.distance_from_dest
+            otherPriority = other.distance_from_source + other.distance_from_dest
         return selfPriority <= otherPriority
 
     def get_heuristic(self):
-        return (self.distance_from_fire + self.distance_from_dest)
+        if self.algorithm == "firealgo":
+            return (self.distance_from_fire + self.distance_from_dest)
+        else:
+            return (self.distance_from_source + self.distance_from_dest)
 
     def get_children(self, node, algorithm):
         if algorithm == 'dfs':

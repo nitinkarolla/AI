@@ -21,8 +21,8 @@ class MazeRunner():
     def create_environment(self):
 
         # Create the maze
-        self.env = Environment(self.fire)
-        self.env.generate_maze(n = self.maze_dimension, p = self.probability_of_obstacles)
+        self.env = Environment(algorithm = self.algorithm, n = self.maze_dimension, p = self.probability_of_obstacles, fire = self.fire)
+        self.env.generate_maze()
 
         # Generate graph from the maze
         self.env.create_graph_from_maze()

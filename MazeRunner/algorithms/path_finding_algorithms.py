@@ -20,6 +20,8 @@ class PathFinderAlgorithm():
 
     def _get_unvisited_children(self, node_children):
 
+        # If the algorithm is firealgo, then reorder children based on their heuristic values - distance from fire +
+        # distance from destination
         if self.algorithm == "firealgo":
             temp_queue = Q.PriorityQueue()
 
@@ -69,7 +71,6 @@ class PathFinderAlgorithm():
             time_taken_to_die.append(temp)
 
         time_before_i_call_fire_engine = min(time_taken_to_die)
-
         alpha_val = -0.5
 
         return (alpha_val * time_before_i_call_fire_engine)

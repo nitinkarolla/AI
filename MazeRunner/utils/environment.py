@@ -9,26 +9,34 @@ class Environment():
     ProbabilityOfBlockedMaze = 0.4
     DimensionOfMaze = 10
 
-    def __init__(self, fire):
-        self.maze = None
-        self.maze_copy = None
-        self.colormesh = None
+    def __init__(self,
+                 n = DimensionOfMaze,
+                 p = ProbabilityOfBlockedMaze,
+                 fire = None,
+                 algorithm = None,
+                 maze = None,
+                 maze_copy = None,
+                 colormesh = None):
+        self.n = n
+        self.p = p
+        self.algorithm = algorithm
+        self.maze = maze
+        self.maze_copy = maze_copy
+        self.colormesh = colormesh
         self.fire = fire
 
         # The default colormap of our maze - 0: Black, 1: White, 2: Grey
         self.cmap = colors.ListedColormap(['black', 'white', 'grey', 'orange', 'red'])
         self.norm = colors.BoundaryNorm(boundaries = [0, 1, 2, 3, 4], ncolors = 4)
 
-    def generate_maze(self, n = DimensionOfMaze, p = ProbabilityOfBlockedMaze):
-        self.n = n
-        self.p = p
-
-        self.maze = np.array([list(np.random.binomial(1, 1 - p, n)) for _ in range(n)])
+    def generate_maze(self):
+        self.maze = np.array([list(np.random.binomial(1, 1 - self.p, self.n)) for _ in range(self.n)])
         self.maze[0, 0] = 4
-        self.maze[n-1, n-1] = 4
+        self.maze[self.n - 1, self.n - 1] = 4
 
         if self.fire:
-            self.maze[n-1, 0] = 3
+            self.maze[self.n - 1, 0] = 3
+
         # This will be the original maze
         self.original_maze = self.maze.copy()
 
@@ -39,7 +47,7 @@ class Environment():
         self.original_maze = new_maze
 
     def create_graph_from_maze(self):
-        self.graph = Graph(maze = self.maze)
+        self.graph = Graph(maze = self.maze, algorithm = self.algorithm)
         self.graph.create_graph_from_maze()
 
     def render_maze(self, title = None, timer = 1e-15):
