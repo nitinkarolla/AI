@@ -10,7 +10,7 @@ class PathFinderAlgorithm():
     ThinningAStar = "thin_astar"
     FireString = "firealgo"
 
-    def __init__(self, environment = None, algorithm = None, visual = False, heuristic = None):
+    def __init__(self, environment = None, algorithm = None, visual = False, heuristic = None, q = None):
         self.environment = environment
         self.graph_maze = self.environment.graph.graph_maze
         self.algorithm = algorithm
@@ -19,6 +19,7 @@ class PathFinderAlgorithm():
         self.visited = []
         self.path = []
         self.max_fringe_length = 0
+        self.q = q
 
         if self.algorithm in ['dfs', 'bfs']:
             self.title = "Algorithm: " + self.algorithm
@@ -331,7 +332,7 @@ class PathFinderAlgorithm():
         zero_value_indices = list(zip(*(np.where(maze == 0)[0], np.where(maze == 0)[1])))
         zero_values_indices_length = range(len(zero_value_indices))
         random_zero_value_indices = np.random.choice(zero_values_indices_length,
-                                                     size = int(0.5 * len(zero_value_indices)),
+                                                     size = int(self.q * len(zero_value_indices)),
                                                      replace = False)
 
         for index in random_zero_value_indices:
