@@ -4,5 +4,5 @@ class MineSweeperAgent():
         self.environment = environment
         self.visual = visual
 
-    def find_mines(self):
+    def play(self):
         return

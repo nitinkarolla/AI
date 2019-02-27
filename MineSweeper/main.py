@@ -19,14 +19,11 @@ class MineSweeper():
         self.env = Environment(n = self.maze_dimension, number_of_mines = self.number_of_mines)
         self.env.generate_environment()
 
-        # Generate graph from the maze
-        # self.env.create_graph_from_env()
-
     def run(self):
 
         # Use the agent to find mines in our mine-sweeper environment
         self.mine_sweeper_agent = MineSweeperAgent(environment = self.env, visual = self.visual)
-        self.mine_sweeper_agent.find_mines()
+        self.mine_sweeper_agent.play()
 
 
 if __name__ == "__main__":

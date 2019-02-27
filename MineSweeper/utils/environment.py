@@ -33,7 +33,7 @@ class Environment():
         self.mines.flat[idx[:self.number_of_mines]] = 1
 
         # count the number of mines bordering each square
-        self.mine_env = convolve2d(self.mines.astype(complex), np.ones((3, 3)), mode = 'same').real.astype(int)
+        self.mine_maze = convolve2d(self.mines.astype(complex), np.ones((3, 3)), mode = 'same').real.astype(int)
 
     def _reveal_unmarked_mines(self):
         for (row, column) in zip(*np.where(self.mines & ~self.flags.astype(bool))):
@@ -52,7 +52,11 @@ class Environment():
     def _mark_remaining_mines(self):
         for (row, column) in zip(*np.where(self.mines & ~self.flags.astype(bool))):
             self.add_mine_flag(row, column)
-
+    
+    def _create_graph_from_env(self):
+        self.graph = Graph(mine_maze = self.mine_maze)
+        self.graph.create_graph_from_env()
+        
     def generate_environment(self):
 
         # Create the figure and axes
@@ -76,10 +80,8 @@ class Environment():
                                   for j in range(self.n)]
                                  for i in range(self.n)])
         [self.ax.add_patch(sq) for sq in self.squares.flat]
-
-    def create_graph_from_env(self):
-        self.graph = Graph(mine_env = self.mine_env)
-        self.graph.create_graph_from_env()
+        
+        self._create_graph_from_env()
 
     def add_mine_flag(self, row, column):
         if self.clicked[row, column]:
@@ -110,7 +112,7 @@ class Environment():
             self._cross_out_wrong_flags()
 
         # square with no surrounding mines: clear out all adjacent squares
-        elif self.mine_env[row, column] == 0:
+        elif self.mine_maze[row, column] == 0:
             self.squares[row, column].set_facecolor(self.UncoveredColor)
             for ii in range(max(0, row - 1), min(self.n, row + 2)):
                 for jj in range(max(0, column - 1), min(self.n, column + 2)):
@@ -119,8 +121,8 @@ class Environment():
             self.squares[row, column].set_facecolor(self.UncoveredColor)
             self.ax.text(x = row + 0.5,
                          y = column + 0.5,
-                         s = str(self.mine_env[row, column]),
-                         color = self.CountColors[self.mine_env[row, column]],
+                         s = str(self.mine_maze[row, column]),
+                         color = self.CountColors[self.mine_maze[row, column]],
                          ha = 'center',
                          va = 'center',
                          fontsize = 18,
