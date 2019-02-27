@@ -2,7 +2,7 @@ import matplotlib
 matplotlib.use('tkAgg')
 from pylab import *
 from matplotlib import colors
-from MazeRunner.utils.graph import Graph
+from utils.graph import Graph
 
 
 class Environment():

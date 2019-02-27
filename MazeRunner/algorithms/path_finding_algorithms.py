@@ -1,6 +1,6 @@
 import numpy as np
 import queue as Q
-from MazeRunner.utils.environment import Environment
+from utils.environment import Environment
 
 
 class PathFinderAlgorithm():
