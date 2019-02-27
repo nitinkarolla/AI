@@ -1,6 +1,7 @@
 import argparse
 import sys
 from time import time
+import numpy as np
 import matplotlib
 matplotlib.use("TkAgg")
 import matplotlib.pyplot as plt
@@ -18,11 +19,11 @@ class MazeRunner():
         self.heuristic = heuristic
         self.fire = fire
 
-    def create_environment(self):
+    def create_environment(self, new_maze = None):
 
         # Create the maze
         self.env = Environment(algorithm = self.algorithm, n = self.maze_dimension, p = self.probability_of_obstacles, fire = self.fire)
-        self.env.generate_maze()
+        self.env.generate_maze(new_maze = new_maze)
 
         # Generate graph from the maze
         self.env.create_graph_from_maze()
@@ -56,6 +57,83 @@ class MazeRunner():
         plt.figure()
         plt.show()
 
+    def plot_performance_metrics(self):
+        algo_performance = dict()
+
+        env = Environment(n = 20,
+                          p = self.probability_of_obstacles,
+                          fire = self.fire)
+
+        # env.generate_maze()
+        # env.create_graph_from_maze()
+
+        for n in np.arange(10, 100, 10):
+            print(n)
+
+            for algo in ["astar"]:
+                for heuristic in ["euclid", "manhattan"]:
+                    print(algo, heuristic)
+
+	                if (algo + "_" + heuristic) not in algo_performance:
+	                    algo_performance[(algo + "_" + heuristic)] = dict()
+	            
+	                if algo not in algo_performance:
+	                    algo_performance[algo] = dict()
+	            
+	                env.algorithm = algo
+	                env.create_graph_from_maze()
+	            
+	                path_finder = PathFinderAlgorithm(environment = env,
+	                                                  algorithm = algo,
+	                                                  visual = self.visual,
+	                                                  heuristic = self.heuristic)
+	                path_finder.run_path_finder_algorithm()
+	                performances = path_finder.performance_dict
+	            
+	                if "path_length" not in algo_performance[(algo + "_" + heuristic)]:
+                        algo_performance[(algo + "_" + heuristic)]["path_length"] = []
+
+                    if "maximum_fringe_size" not in algo_performance[(algo + "_" + heuristic)]:
+                        algo_performance[(algo + "_" + heuristic)]["maximum_fringe_size"] = []
+
+                    if "number_of_nodes_expanded" not in algo_performance[(algo + "_" + heuristic)]:
+                        algo_performance[(algo + "_" + heuristic)]["number_of_nodes_expanded"] = []
+
+                    algo_performance[(algo + "_" + heuristic)]['path_length'].append(performances['path_length'])
+                    algo_performance[(algo + "_" + heuristic)]['maximum_fringe_size'].append(performances['maximum_fringe_size'])
+                    algo_performance[(algo + "_" + heuristic)]['number_of_nodes_expanded'].append(performances['number_of_nodes_expanded'])
+
+            for algo in ["astar", "thin_astar"]:
+                for heuristic in ["euclid", "manhattan"]:
+                    print(algo, heuristic)
+
+                    if (algo + "_" + heuristic) not in algo_performance:
+                        algo_performance[(algo + "_" + heuristic)] = dict()
+
+                    env.algorithm = algo
+
+                    path_finder = PathFinderAlgorithm(environment = env,
+                                                      algorithm = algo,
+                                                      q = q,
+                                                      visual = self.visual,
+                                                      heuristic = heuristic)
+                    path_finder.run_path_finder_algorithm()
+                    performances = path_finder.performance_dict
+
+                    if "path_length" not in algo_performance[(algo + "_" + heuristic)]:
+                        algo_performance[(algo + "_" + heuristic)]["path_length"] = []
+
+                    if "maximum_fringe_size" not in algo_performance[(algo + "_" + heuristic)]:
+                        algo_performance[(algo + "_" + heuristic)]["maximum_fringe_size"] = []
+
+                    if "number_of_nodes_expanded" not in algo_performance[(algo + "_" + heuristic)]:
+                        algo_performance[(algo + "_" + heuristic)]["number_of_nodes_expanded"] = []
+
+                    algo_performance[(algo + "_" + heuristic)]['path_length'].append(performances['path_length'])
+                    algo_performance[(algo + "_" + heuristic)]['maximum_fringe_size'].append(performances['maximum_fringe_size'])
+                    algo_performance[(algo + "_" + heuristic)]['number_of_nodes_expanded'].append(performances['number_of_nodes_expanded'])
+
+        return algo_performance
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description = 'generate path-finding algorithms to traverse mazes')
