@@ -21,7 +21,7 @@ class Environment():
                  number_of_mines = NumberOfMines):
         self.n = n
         self.number_of_mines = number_of_mines
-        self.mines = np.zeros((self.n, self.n), dtype = bool)
+        self.mines = None
         self.clicked = np.zeros((self.n, self.n), dtype = bool)
         self.flags = np.zeros((self.n, self.n), dtype = object)
 
@@ -30,6 +30,7 @@ class Environment():
         # randomly place mines on a grid, but not on space (i, j)
         idx = np.concatenate([np.arange(row * self.n + column), np.arange(row * self.n + column + 1, self.n * self.n)])
         np.random.shuffle(idx)
+        self.mines = np.zeros((self.n, self.n), dtype = bool)
         self.mines.flat[idx[:self.number_of_mines]] = 1
 
         # count the number of mines bordering each square
@@ -52,11 +53,11 @@ class Environment():
     def _mark_remaining_mines(self):
         for (row, column) in zip(*np.where(self.mines & ~self.flags.astype(bool))):
             self.add_mine_flag(row, column)
-    
+
     def _create_graph_from_env(self):
         self.graph = Graph(mine_maze = self.mine_maze)
         self.graph.create_graph_from_env()
-        
+
     def generate_environment(self):
 
         # Create the figure and axes
@@ -80,8 +81,8 @@ class Environment():
                                   for j in range(self.n)]
                                  for i in range(self.n)])
         [self.ax.add_patch(sq) for sq in self.squares.flat]
-        
-        self._create_graph_from_env()
+
+        # self._create_graph_from_env()
 
     def add_mine_flag(self, row, column):
         if self.clicked[row, column]:
