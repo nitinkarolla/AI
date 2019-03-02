@@ -30,14 +30,14 @@ class Environment():
         self.norm = colors.BoundaryNorm(boundaries = [0, 1, 2, 3, 4], ncolors = 4)
 
     def generate_maze(self, new_maze = None):
-    
+
         if new_maze is not None:
             self.maze = new_maze
             self.original_maze = self.maze.copy()
             self.maze_copy = self.maze.copy()
             self.create_graph_from_maze()
             return
-          
+
         self.maze = np.array([list(np.random.binomial(1, 1 - self.p, self.n)) for _ in range(self.n)])
         self.maze[0, 0] = 4
         self.maze[self.n - 1, self.n - 1] = 4
@@ -58,8 +58,8 @@ class Environment():
         self.graph = Graph(maze = self.maze, algorithm = self.algorithm)
         self.graph.create_graph_from_maze()
 
-    def render_maze(self, title = None, timer = 1e-5):
-      
+    def render_maze(self, title = None, timer = 1e-10):
+
         # Create a mask for the particular cell and change its color to green
         masked_maze_copy = np.rot90(np.ma.masked_where(self.maze_copy == -1, self.maze_copy), k = 1)
         self.cmap.set_bad(color = 'green')
@@ -124,7 +124,7 @@ class Environment():
         self.create_graph_from_maze()
 
     def modify_environment(self, row = None, column = None, new_maze = None):
-      
+
         if new_maze is not None:
             self.maze = new_maze
         else:
