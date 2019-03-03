@@ -39,7 +39,7 @@ if __name__ == "__main__":
 
     mine_sweeper.create_environment()
     mine_sweeper.env.click_square(0, 0)
-    mine_sweeper.env.render_env()
+    mine_sweeper.env.render_env(100)
     s
     mine_sweeper.env.click_square(mine_sweeper.ground_dimension - 1, mine_sweeper.ground_dimension - 1)
     mine_sweeper.env.render_env()

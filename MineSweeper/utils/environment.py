@@ -81,7 +81,7 @@ class Environment():
 
         # Create the figure and axes
         self.fig = plt.figure(figsize = ((self.n + 2) / 3., (self.n + 2) / 3.))
-        self.ax = self.fig.add_axes((0.05, 0.05, 0.9, 0.9),
+        self.ax = self.fig.add_axes((0.1, 0.1, 0.4, 0.8),
                                     aspect = 'equal',
                                     frameon = False,
                                     xlim = (-0.05, self.n + 0.05),
@@ -102,8 +102,7 @@ class Environment():
         [self.ax.add_patch(sq) for sq in self.squares.flat]
 
         # Create a duplicate figure and axes
-        self.fig_copy = plt.figure(figsize = ((self.n + 2) / 3., (self.n + 2) / 3.))
-        self.ax_copy = self.fig_copy.add_axes((0.05, 0.05, 0.9, 0.9),
+        self.ax_copy = self.fig.add_axes((0.5, 0.1, 0.4, 0.8),
                                       aspect = 'equal',
                                       frameon = False,
                                       xlim = (-0.05, self.n + 0.05),
