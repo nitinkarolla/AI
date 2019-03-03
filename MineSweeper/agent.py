@@ -1,4 +1,5 @@
 import numpy as np
+from copy import copy
 
 class MineSweeperAgent():
 
@@ -17,6 +18,7 @@ class MineSweeperAgent():
     def basic_solution(self, ground):
         old_ground = None
         while not np.array_equal(old_ground, ground):
+            old_ground = copy(ground)
             ground = self.basic_solver(ground)
                 
         
