@@ -169,7 +169,7 @@ class Environment():
             self.game_over = True
             self._mark_remaining_mines()
 
-    def render_env(self, timer = 2):
+    def render_env(self, timer = 0.1):
         self.ax.plot()
         self.ax_copy.plot()
         plt.xticks([])

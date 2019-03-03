@@ -33,16 +33,17 @@ class MineSweeperAgent():
                         self.flag_all_neighbours(row,column)
                     
                     else:
-                        if self.get_bomb(row,column) == ground[row,column].value:
+                        if self.get_bomb(row,column) == ground[row,column]:
                             self.query_all_neighbours(row,column)
-                        elif self.get_unexplored(row,column) == ground[row,column].value:
+                        elif self.get_unexplored(row,column) == ground[row,column]:
                             self.flag_all_neighbours(row,column)
     
 
     def query_all_neighbours(self,row,column):
         for i in [-1,0,1]:
             for j in [-1,0,1]:
-                if (column -1 >= 0 and row -1 >= 0
+                if (row + i >= 0 and column + j >= 0 
+                    and row + i < self.env.mine_ground_copy.shape[0] and column + j < self.env.mine_ground_copy.shape[1]):
                         if self.env.mine_ground_copy[row+i,column+j] == -1:
                             self.env.click_square(row+i,column+j)
                             self.env.render_env()
@@ -51,35 +52,31 @@ class MineSweeperAgent():
     def flag_all_neighbours(self,row,column):
         for i in [-1,0,1]:
             for j in [-1,0,1]:
-                try :
+                if (row + i >= 0 and column + j >= 0 
+                    and row + i < self.env.mine_ground_copy.shape[0] and column + j < self.env.mine_ground_copy.shape[1]):
                     if self.env.mine_ground_copy[row+i,column+j] == -1:
                         self.env.add_mine_flag(row+i,column+j)
                         self.env.render_env()
-                except :
-                    continue
-        return
     
     def get_bomb(self,row,column):
         bomb_count = 0
         for i in [-1,0,1]:
             for j in [-1,0,1]:
-                try :
+                if (row + i >= 0 and column + j >= 0 
+                    and row + i < self.env.mine_ground_copy.shape[0] and column + j < self.env.mine_ground_copy.shape[1]):
                     if self.env.flags.astype(bool)[row+i,column+j] == True:
                         bomb_count = bomb_count + 1   
-                except :
-                    continue
-        return
+        return bomb_count
     
     def get_unexplored(self,row,column):
         unexplored_count = 0
         for i in [-1,0,1]:
             for j in [-1,0,1]:
-                try :
+                if (row + i >= 0 and column + j >= 0 
+                    and row + i < self.env.mine_ground_copy.shape[0] and column + j < self.env.mine_ground_copy.shape[1]):
                     if self.env.mine_ground_copy[row+i,column+j] == -1:
                         unexplored_count = unexplored_count + 1   
-                except :
-                    continue
-        return
+        return unexplored_count
 
                     
             
