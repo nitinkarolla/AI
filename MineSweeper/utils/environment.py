@@ -86,6 +86,7 @@ class Environment():
                                     frameon = False,
                                     xlim = (-0.05, self.n + 0.05),
                                     ylim = (-0.05, self.n + 0.05))
+        self.ax.set_title("Actual")
         for axis in (self.ax.xaxis, self.ax.yaxis):
             axis.set_major_formatter(plt.NullFormatter())
             axis.set_major_locator(plt.NullLocator())
@@ -107,6 +108,7 @@ class Environment():
                                       frameon = False,
                                       xlim = (-0.05, self.n + 0.05),
                                       ylim = (-0.05, self.n + 0.05))
+        self.ax_copy.set_title("Agent")
         for axis in (self.ax_copy.xaxis, self.ax_copy.yaxis):
             axis.set_major_formatter(plt.NullFormatter())
             axis.set_major_locator(plt.NullLocator())
@@ -130,6 +132,7 @@ class Environment():
             self.number_of_flags_left += 1
         else:
             self.number_of_flags_left -= 1
+            # self.clicked[row, column] = True
             self.flags[row, column] = plt.Polygon(self.FlagVertices + [row, column], fc = 'red', ec = 'black', lw = 2)
             self.ax_copy.add_patch(self.flags[row, column])
 
@@ -138,7 +141,7 @@ class Environment():
             self._place_mines(row, column)
 
         # if there is a flag or square is already clicked, do nothing
-        if self.flags[row, column] or self.clicked[row, column]:
+        if self.flags.astype(bool)[row, column] or self.clicked[row, column]:
             return
 
         # Set clicked to True for this square
@@ -169,7 +172,7 @@ class Environment():
             self.game_over = True
             self._mark_remaining_mines()
 
-    def render_env(self, timer = 0.1):
+    def render_env(self, timer = 0.01):
         self.ax.plot()
         self.ax_copy.plot()
         plt.xticks([])

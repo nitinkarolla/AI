@@ -1,5 +1,6 @@
 import argparse
 import sys
+import numpy as np
 import matplotlib
 matplotlib.use("TkAgg")
 from utils.environment import Environment
@@ -28,7 +29,7 @@ class MineSweeper():
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='generate path-finding algorithms to traverse mazes')
-    parser.add_argument("-n", "--ground_dimension", default = 8)
+    parser.add_argument("-n", "--ground_dimension", default = 3)
     parser.add_argument("-nmines", "--number_of_mines", default = 4)
     parser.add_argument('-v', "--visual", default = False)
     args = parser.parse_args(sys.argv[1:])
