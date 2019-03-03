@@ -29,7 +29,7 @@ class MineSweeper():
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='generate path-finding algorithms to traverse mazes')
     parser.add_argument("-n", "--ground_dimension", default = 8)
-    parser.add_argument("-nmines", "--number_of_mines", default = 10)
+    parser.add_argument("-nmines", "--number_of_mines", default = 1)
     parser.add_argument('-v', "--visual", default = False)
     args = parser.parse_args(sys.argv[1:])
 
@@ -38,9 +38,4 @@ if __name__ == "__main__":
                                visual = bool(args.visual))
 
     mine_sweeper.create_environment()
-    mine_sweeper.env.click_square(0, 0)
-    mine_sweeper.env.render_env()
-    mine_sweeper.env.click_square(mine_sweeper.ground_dimension - 1, mine_sweeper.ground_dimension - 1)
-    mine_sweeper.env.render_env()
-    mine_sweeper.env.add_mine_flag(5, 2)
-    mine_sweeper.env.render_env()
+    mine_sweeper.run()
