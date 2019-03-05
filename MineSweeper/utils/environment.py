@@ -27,7 +27,7 @@ class Environment():
         self.flags = np.zeros((self.n, self.n), dtype = object)
         self.number_of_flags_left = number_of_mines
         self.mine_ground_copy = np.empty((self.n, self.n))*np.nan
-        self.variable_mine_ground_copy = np.empty((self.n, self.n))*np.nan
+        self.variable_mine_ground_copy = np.empty((self.n, self.n), dtype = object)
         self.grid = gridspec.GridSpec(1, 2, wspace = 0.2, hspace = 0.7)
 
     def _place_mines(self, row, column):
