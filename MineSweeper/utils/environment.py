@@ -124,7 +124,7 @@ class Environment():
         [self.ax_copy.add_patch(sq) for sq in self.squares_copy.flat]
 
     def add_mine_flag(self, row, column):
-        if self.clicked[row, column]:
+        if self.clicked[row, column]  :
             pass
         elif self.flags[row, column]:
             self.ax_copy.patches.remove(self.flags[row, column])
@@ -132,7 +132,6 @@ class Environment():
             self.number_of_flags_left += 1
         else:
             self.number_of_flags_left -= 1
-            # self.clicked[row, column] = True
             self.flags[row, column] = plt.Polygon(self.FlagVertices + [row, column], fc = 'red', ec = 'black', lw = 2)
             self.ax_copy.add_patch(self.flags[row, column])
 
@@ -141,7 +140,7 @@ class Environment():
             self._place_mines(row, column)
 
         # if there is a flag or square is already clicked, do nothing
-        if self.flags.astype(bool)[row, column] or self.clicked[row, column]:
+        if self.flags.astype(bool)[row, column] ==  True or self.clicked[row, column]:
             return
 
         # Set clicked to True for this square
