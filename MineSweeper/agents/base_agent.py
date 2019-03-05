@@ -20,7 +20,7 @@ class BaseAgent():
     def _basic_solver(self, ground):
         for row in range(ground.shape[0]):
             for column in range(ground.shape[1]):
-                if ground[row, column] == -1 or self.env.flags[row, column]:
+                if np.isnan(ground[row, column]) or self.env.flags[row, column]:
                     continue
                 else:
                     if ground[row, column] == 0:
@@ -42,22 +42,22 @@ class BaseAgent():
                     continue
                 if (row + i >= 0 and column + j >= 0 and row + i < self.env.mine_ground_copy.shape[0]
                         and column + j < self.env.mine_ground_copy.shape[1] and (not self.env.flags[row + i, column + j])
-                        and self.env.mine_ground_copy[row + i, column + j] == -1):
+                        and np.isnan(self.env.mine_ground_copy[row + i, column + j])):
                             self.env.click_square(row + i, column + j)
                             self.env.render_env()
 
-    def _flag_all_neighbours(self,row,column):
+    def _flag_all_neighbours(self, row, column):
         for i in [-1, 0, 1]:
             for j in [-1, 0, 1]:
                 if (i == 0 and j == 0):
                     continue
                 if (row + i >= 0 and column + j >= 0 and row + i < self.env.mine_ground_copy.shape[0]
                         and column + j < self.env.mine_ground_copy.shape[1] and (not self.env.flags[row + i, column + j])
-                        and self.env.mine_ground_copy[row + i, column + j] == -1):
+                        and np.isnan(self.env.mine_ground_copy[row + i, column + j])):
                         self.env.add_mine_flag(row + i, column + j)
                         self.env.render_env()
 
-    def _get_bomb(self,row,column):
+    def _get_bomb(self, row, column):
         bomb_count = 0
         for i in [-1, 0, 1]:
             for j in [-1, 0, 1]:
@@ -75,6 +75,6 @@ class BaseAgent():
                 if (i == 0 and j == 0):
                     continue
                 if (row + i >= 0 and column + j >= 0 and row + i < self.env.mine_ground_copy.shape[0]
-                        and column + j < self.env.mine_ground_copy.shape[1] and self.env.mine_ground_copy[row + i, column + j] == -1):
+                        and column + j < self.env.mine_ground_copy.shape[1] and np.isnan(self.env.mine_ground_copy[row + i, column + j])):
                         unexplored_count = unexplored_count + 1
         return unexplored_count

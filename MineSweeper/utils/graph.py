@@ -1,5 +1,5 @@
 import numpy as np
-from utils.node import Node
+from utils.variable import Variable
 
 
 class Graph():

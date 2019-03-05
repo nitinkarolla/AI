@@ -1,7 +1,7 @@
 import matplotlib
 matplotlib.use('tkAgg')
 from pylab import *
-from utils.graph import Graph
+from utils.variable import Variable
 from scipy.signal import convolve2d
 from matplotlib.patches import RegularPolygon
 import matplotlib.gridspec as gridspec
@@ -26,7 +26,8 @@ class Environment():
         self.clicked = np.zeros((self.n, self.n), dtype = bool)
         self.flags = np.zeros((self.n, self.n), dtype = object)
         self.number_of_flags_left = number_of_mines
-        self.mine_ground_copy = np.ones((self.n, self.n))*-1
+        self.mine_ground_copy = np.empty((self.n, self.n))*np.nan
+        self.variable_mine_ground_copy = np.empty((self.n, self.n))*np.nan
         self.grid = gridspec.GridSpec(1, 2, wspace = 0.2, hspace = 0.7)
 
     def _place_mines(self, row, column):
@@ -86,7 +87,7 @@ class Environment():
                                     frameon = False,
                                     xlim = (-0.05, self.n + 0.05),
                                     ylim = (-0.05, self.n + 0.05))
-        self.ax.set_title("Actual")
+        self.ax.set_title("Actual", fontsize = 20)
         for axis in (self.ax.xaxis, self.ax.yaxis):
             axis.set_major_formatter(plt.NullFormatter())
             axis.set_major_locator(plt.NullLocator())
@@ -108,7 +109,7 @@ class Environment():
                                       frameon = False,
                                       xlim = (-0.05, self.n + 0.05),
                                       ylim = (-0.05, self.n + 0.05))
-        self.ax_copy.set_title("Agent")
+        self.ax_copy.set_title("Agent", fontsize = 20)
         for axis in (self.ax_copy.xaxis, self.ax_copy.yaxis):
             axis.set_major_formatter(plt.NullFormatter())
             axis.set_major_locator(plt.NullLocator())
@@ -148,6 +149,10 @@ class Environment():
 
         # Open up cells in the mine ground copy
         self.mine_ground_copy[row, column] = self.mine_ground[row, column]
+        self.variable_mine_ground_copy[row, column] = Variable(value = self.mine_ground[row, column],
+                                                               row = row,
+                                                               column = column,
+                                                               has_mine = 0)
 
         # hit a mine: game over
         if self.mines[row, column]:
