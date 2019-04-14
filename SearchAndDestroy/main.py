@@ -17,6 +17,7 @@ class SearchAndDestroy():
         self.target = ()
         self.original_map = self.generate_map()
         self.num_trials = 0
+
         # Make the target
         self.target_type = target_type
         self.target = self.create_target()
@@ -93,13 +94,13 @@ class SearchAndDestroy():
         # Display original matrix in console
         # print("\nOriginal Map: \n", self.original_map)
         self.fig.suptitle("Number of iterations: {}".format(iterations))
-        self.f_ax1.matshow(self.original_map, cmap=cm.get_cmap('Greens', 4))
+        self.f_ax1.matshow(self.original_map, cmap = cm.get_cmap('Greens', 4))
         self.f_ax1.set_title("Actual")
-        self.f_ax2.matshow(belief, cmap=cm.get_cmap('Greys_r'))
+        self.f_ax2.matshow(belief, cmap = cm.get_cmap('Greys_r'))
         self.f_ax2.set_title("Belief Matrix")
-        self.f_ax3.matshow(confidence, cmap=cm.get_cmap('Greys_r'))
+        self.f_ax3.matshow(confidence, cmap = cm.get_cmap('Greys_r'))
         self.f_ax3.set_title("Confidence Matrix")
-        self.f_ax4.matshow(heat_map, cmap=cm.get_cmap('Greys'))
+        self.f_ax4.matshow(heat_map, cmap = cm.get_cmap('Greys'))
         self.f_ax4.set_title("Agent")
 
         self.f_ax1.scatter(self.target[0], self.target[1], s=100, c='red', marker='x')
@@ -285,7 +286,7 @@ class Agent():
 
     def get_neighbors_sum(self, evidence_matrix, type1, type2):
         n_sum = np.zeros_like(self.belief)
-        for i in range (self.dim):
+        for i in range(self.dim):
             for j in range(self.dim):
                 if evidence_matrix[i][j] != 0:
                     check, count = self.valid_neighbors(i, j, type2)
@@ -297,121 +298,114 @@ class Agent():
                         n_sum[i][j] += len(count)
         
         return n_sum
-    # def get_neighbors_sum(self, evidence_matrix):
-    #     n_sum = np.zeros_like(self.belief)
-    #     for i in range(self.dim):
-    #         for j in range(self.dim):
-    #             if evidence_matrix[i][j] != 0:
-    #                 if i > 0 and j > 0 and i < self.dim-1 and j < self.dim-1:
-    #                     n_sum[i][j] = evidence_matrix[i-1][j] + evidence_matrix[i+1][j] + evidence_matrix[i-1][j-1] + evidence_matrix[i-1][j+1] + evidence_matrix[i][j+1] + evidence_matrix[i][j+1] +  evidence_matrix[i+1][j+1] + evidence_matrix[i+1][j-1]
-                    
-    #                 elif i == 0 and j == 0:
-    #                     n_sum[i][j] = evidence_matrix[i][j+1] + evidence_matrix[i+1][j+1] + evidence_matrix[i+1][j]
-    #                 elif i == self.dim-1 and j == self.dim-1:
-    #                     n_sum[i][j] = evidence_matrix[i][j-1] + evidence_matrix[i-1][j] + evidence_matrix[i-1][j-1]
-    #                 elif i == 0 and j == self.dim-1:
-    #                     n_sum[i][j] = evidence_matrix[i][j-1] + evidence_matrix[i+1][j-1] + evidence_matrix[i+1][j]
-    #                 elif i == self.dim-1 and j == 0:
-    #                     n_sum[i][j] = evidence_matrix[i][j+1] + evidence_matrix[i-1][j+1] + evidence_matrix[i-1][j]
-                    
-    #                 elif i == 0:
-    #                     n_sum[i][j] = evidence_matrix[i][j-1] + evidence_matrix[i][j+1] + evidence_matrix[i+1][j] +evidence_matrix[i+1][j-1] + evidence_matrix[i+1][j+1]
-    #                 elif i == self.dim -1:
-    #                     n_sum[i][j] = evidence_matrix[i][j-1] + evidence_matrix[i][j+1] + evidence_matrix[i-1][j] +evidence_matrix[i-1][j-1] + evidence_matrix[i-1][j+1]
-    #                 elif j == 0:
-    #                     n_sum[i][j] = evidence_matrix[i][j+1] + evidence_matrix[i-1][j] + evidence_matrix[i+1][j] +evidence_matrix[i-1][j+1] + evidence_matrix[i+1][j+1]
-    #                 elif j == self.dim -1:
-    #                     n_sum[i][j] = evidence_matrix[i][j-1] + evidence_matrix[i+1][j] + evidence_matrix[i-1][j] +evidence_matrix[i+1][j-1] + evidence_matrix[i-1][j-1]
-    #             else:
-    #                 n_sum[i][j] = 0
-    #     return n_sum
 
-    def surveilance_report(self, type1, type2):
-        evidence_points = np.zeros_like(self.belief)
-        belief_sum_residual = 0
-        cells_with_values = 0
-        for i in range(self.dim):
-            for j in range(self.dim):
-                current_terrain = self.false_neg_rate(i, j)[1]
-                if current_terrain == type1 and self.valid_neighbors(i, j, type2)[0]:
-                    cells_with_values += 1
-                    evidence_points[i][j] = 1
-                elif current_terrain == type2 and self.valid_neighbors(i, j, type1)[0]:
-                    cells_with_values += 1
-                    evidence_points[i][j] = 1
-                else:
-                    belief_sum_residual += self.belief[i][j]
-                    evidence_points[i][j] = 0
-        
-        # print("Belief\n", self.belief)
-        print("Evidence points\n", evidence_points)
-        evidence_sum = self.get_neighbors_sum(evidence_points, type1, type2)
-        new_belief = self.belief*evidence_points
-        # print(belief_sum_residual, cells_with_values)
+    def update_belief(self, type1, type2):
+        new_belief = self.belief.copy()
+        hill_coords = list(zip(*np.where(game.original_map == 1)))
+        forest_coords = list(zip(*np.where(game.original_map == 2)))
 
-        print("Sum of neighbors\n", evidence_sum)
-        # print("Total sum of neighbors", np.sum(evidence_sum))
-        belief_with_evidence = np.zeros_like(new_belief)
-        for i in range(self.dim):
-            for j in range(self.dim):
-                if new_belief[i][j] > 0.0:
-                    new_belief[i][j] += new_belief[i][j] + evidence_sum[i][j]*(belief_sum_residual/cells_with_values)
-                    belief_with_evidence[i][j] = new_belief[i][j]/evidence_sum[i][j]
-        
-        # print("After evidence, belief\n", new_belief)
-        # print("Final belief\n",belief_with_evidence) 
-        # return belief_with_evidence
+        # Change belief of non-hilly and forest terrains to 0
+        other_coords_1 = list(zip(*np.where(game.original_map == 0)))
+        other_coords_2 = list(zip(*np.where(game.original_map == 3)))
+        other_coords = other_coords_1 + other_coords_2
+        for (r, c) in other_coords:
+            new_belief[r, c] = 0
+
+        # Update all hill cells beside forest cell
+        for (row, column) in forest_coords:
+
+            # Iterate through the neighbours:
+            hill_counts = 0
+            surrounding_hills = []
+            for i in [-1, 0, 1]:
+                for j in [-1, 0, 1]:
+                    if i == 0 and j == 0:
+                        continue
+                    if (row + i, column + j) in hill_coords:
+                        hill_counts += 1
+                        surrounding_hills.append((row + i, column + j))
+
+            # Divide the current belief of forest equally among the surrounding hills
+            if hill_counts != 0:
+                belief_delta = self.belief[row, column]/hill_counts
+                for (r, c) in surrounding_hills:
+                    new_belief[r, c] += belief_delta
+
+        # Update all hill cells beside hill cell
+        for (row, column) in hill_coords:
+
+            # Iterate through the neighbours:
+            forest_counts = 0
+            surrounding_forests = []
+            for i in [-1, 0, 1]:
+                for j in [-1, 0, 1]:
+                    if i == 0 and j == 0:
+                        continue
+                    if (row + i, column + j) in forest_coords:
+                        forest_counts += 1
+                        surrounding_forests.append((row + i, column + j))
+
+            # Divide the current belief of forest equally among the surrounding hills
+            if forest_counts != 0:
+                belief_delta = self.belief[row, column] / forest_counts
+                for (r, c) in surrounding_forests:
+                    new_belief[r, c] += belief_delta
+
+        # Normalise the new belief matrix
+        sum = new_belief.sum()
+        new_belief /= sum
+        self.belief = new_belief
     
     def run_game_moving_target(self, rule_type):
+        game.original_map = np.uint64(game.original_map)
         iterations = 1
         target = self.target_cell
         if rule_type == "normal":
             current_cell = self.max_prob_cell(game.rule)
             self.heat_map[current_cell[0], current_cell[1]] += 1
 
-            while True:                
+            while True:
                 if self.visual:
-                        plt.ion()
-                        plt.show()
-                        plt.pause(1e-15)
-                        game.generate_layout(self.belief, self.confidence, self.heat_map, iterations)
+                    plt.ion()
+                    plt.show()
+                    plt.pause(1e-15)
+                    game.generate_layout(self.belief, self.confidence, self.heat_map, iterations)
 
                 if current_cell == target:
                     terrain_prob = self.false_neg_rate(current_cell[0], current_cell[1])[0]
                     p = random.uniform(0, 1)
-                    # print("Terrain FNR: ", terrain_prob, " Probability: ", p)
                     if p > terrain_prob:
+                        print("Number of Iterations = ", str(iterations))
                         return iterations
-                        # break
                 else:
                     # Update iterations
                     iterations += 1
                     
                     # Calculate new belief of current cell
                     self.belief[current_cell[0]][current_cell[1]] *= self.false_neg_rate(current_cell[0], current_cell[1])[0]
-                    # print("New Belief Matrix: \n", self.belief)
                     
                     # Sum of the belief matrix
                     belief_sum = np.sum(self.belief)
+
                     # Normalize the belief matrix
                     self.belief = self.belief/belief_sum
-                    # print("Normalized Belief Matrix: \n", self.belief)
 
                     # Target moved to new position
                     target, type1, type2 = self.target_moves(self.target_cell[0], self.target_cell[1])
-                    belief_with_evidence = self.surveilance_report(type1, type2)
+                    self.update_belief(type1, type2)
 
                     # Calculate new confidence based on new belief
                     for i in range(self.dim):
                         for j in range(self.dim):
-                            self.confidence[i][j] = belief_with_evidence[i][j]*(1 - self.false_neg_rate(i, j)[0])
+                            self.confidence[i][j] = self.belief[i][j]*(1 - self.false_neg_rate(i, j)[0])
                     
                     # Sum of the confidence matrix
                     conf_sum = np.sum(self.confidence)
+
                     # Normalize the confidence matrix
                     self.confidence = self.confidence/conf_sum
 
-                    current_cell = self.max_prob_cell(rule=game.rule, matrix=belief_with_evidence)
+                    current_cell = self.max_prob_cell(rule = game.rule, matrix = self.belief)
 
 
 if __name__ == "__main__":
@@ -419,13 +413,13 @@ if __name__ == "__main__":
     parser.add_argument('-n', "--grid_dimension", default=10)
     parser.add_argument('-v', "--visual", default = False)
     parser.add_argument('-r', "--rule", default="belief")
-    parser.add_argument('-q', "--question", default="basic")
+    parser.add_argument('-q', "--question", default = "basic")
     args = parser.parse_args(sys.argv[1:])
 
     if args.question == "basic":
         game = SearchAndDestroy(dimensions=int(args.grid_dimension), visual=args.visual, rule=args.rule, target_type=None)
         agent = Agent(game)
-        agent_iters = agent.run_game(rule_type="normal")
+        agent_iters = agent.run_game(rule_type = "normal")
         print("Number of iterations: ", agent_iters)
 
     if args.question == "q13":
@@ -489,8 +483,10 @@ if __name__ == "__main__":
                 csv.write(row)
         
     elif args.question == "q2":
-        game = SearchAndDestroy(dimensions=int(args.grid_dimension), visual=args.visual, rule=args.rule, target_type=None)
+        game = SearchAndDestroy(dimensions = int(args.grid_dimension),
+                                visual = args.visual,
+                                rule = args.rule,
+                                target_type = None)
         agent = Agent(game)
         print("Original map\n", game.original_map)
-        # agent.run_game_moving_target(rule_type="normal")
-        agent.surveilance_report("flat", "hill")
+        agent.run_game_moving_target(rule_type = "normal")
