@@ -12,6 +12,14 @@ import random
 import csv
 
 class SearchAndDestroy():
+
+    TerrainMapping = {
+        'flat': 0,
+        'Hill': 1,
+        'forest': 2,
+        'caves': 3
+    }
+
     def __init__(self, dimensions, visual, rule, target_type=None):
         self.dim = dimensions
         self.target = ()
@@ -301,53 +309,55 @@ class Agent():
 
     def update_belief(self, type1, type2):
         new_belief = self.belief.copy()
-        hill_coords = list(zip(*np.where(game.original_map == 1)))
-        forest_coords = list(zip(*np.where(game.original_map == 2)))
+        type1_coords = list(zip(*np.where(game.original_map == self.TerrainMapping[type1])))
+        type2_coords = list(zip(*np.where(game.original_map == self.TerrainMapping[type2])))
+
+        other_types = [type for type in self.TerrainMapping.keys() if type not in [type1, type2]]
 
         # Change belief of non-hilly and forest terrains to 0
-        other_coords_1 = list(zip(*np.where(game.original_map == 0)))
-        other_coords_2 = list(zip(*np.where(game.original_map == 3)))
-        other_coords = other_coords_1 + other_coords_2
-        for (r, c) in other_coords:
-            new_belief[r, c] = 0
+        # other_coords_1 = list(zip(*np.where(game.original_map == self.TerrainMapping[other_types[0]])))
+        # other_coords_2 = list(zip(*np.where(game.original_map == self.TerrainMapping[other_types[1]])))
+        # other_coords = other_coords_1 + other_coords_2
+        # for (r, c) in other_coords:
+        #     new_belief[r, c] = 0
 
         # Update all hill cells beside forest cell
-        for (row, column) in forest_coords:
+        for (row, column) in type2_coords:
 
             # Iterate through the neighbours:
-            hill_counts = 0
+            type1_counts = 0
             surrounding_hills = []
             for i in [-1, 0, 1]:
                 for j in [-1, 0, 1]:
                     if i == 0 and j == 0:
                         continue
-                    if (row + i, column + j) in hill_coords:
-                        hill_counts += 1
+                    if (row + i, column + j) in type1_coords:
+                        type1_counts += 1
                         surrounding_hills.append((row + i, column + j))
 
             # Divide the current belief of forest equally among the surrounding hills
-            if hill_counts != 0:
-                belief_delta = self.belief[row, column]/hill_counts
+            if type1_counts != 0:
+                belief_delta = self.belief[row, column]/type1_counts
                 for (r, c) in surrounding_hills:
                     new_belief[r, c] += belief_delta
 
         # Update all hill cells beside hill cell
-        for (row, column) in hill_coords:
+        for (row, column) in type1_coords:
 
             # Iterate through the neighbours:
-            forest_counts = 0
+            type2_counts = 0
             surrounding_forests = []
             for i in [-1, 0, 1]:
                 for j in [-1, 0, 1]:
                     if i == 0 and j == 0:
                         continue
-                    if (row + i, column + j) in forest_coords:
-                        forest_counts += 1
+                    if (row + i, column + j) in type2_coords:
+                        type2_counts += 1
                         surrounding_forests.append((row + i, column + j))
 
             # Divide the current belief of forest equally among the surrounding hills
-            if forest_counts != 0:
-                belief_delta = self.belief[row, column] / forest_counts
+            if type2_counts != 0:
+                belief_delta = self.belief[row, column] / type2_counts
                 for (r, c) in surrounding_forests:
                     new_belief[r, c] += belief_delta
 
