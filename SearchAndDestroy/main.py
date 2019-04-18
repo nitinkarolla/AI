@@ -493,10 +493,80 @@ if __name__ == "__main__":
                 csv.write(row)
         
     elif args.question == "q2":
-        game = SearchAndDestroy(dimensions = int(args.grid_dimension),
+        sol_dict = {}
+        save_file = "q24_analysis.csv"
+        csv = open(save_file, "w")
+        csv.write("Grid Size, Rule Type, Terrain Type, Iterations\n")
+        
+        for grid_size in range(5, 50):
+            for rule in ["belief", "confidence", "belief with distance", "confidence with distance"]:
+                for terrain_target in ["flat", "hill", "forest", "cave"]:
+                    agent_iters = 0
+                    print("Running for Grid Dimension {}, Rule {}, Terrain Type {}".format(grid_size, rule, terrain_target))
+                    for iter in range(10):
+                        
+                        game = SearchAndDestroy(dimensions = int(args.grid_dimension),
                                 visual = args.visual,
                                 rule = args.rule,
                                 target_type = None)
-        agent = Agent(game)
-        print("Original map\n", game.original_map)
-        agent.run_game_moving_target(rule_type = "normal")
+                        agent = Agent(game)
+
+                        if rule in ["belief", "confidence"]:
+                            agent_iters += agent.run_game_moving_target(rule_type = "normal")
+
+                        elif rule in ["belief with distance", "confidence with distance"]:
+                            agent_iters += agent.run_game_moving_target(rule_type="dist")    
+
+                    agent_iters /= 10
+                    if str(grid_size) not in sol_dict:
+                        sol_dict[str(grid_size)] = [[rule, terrain_target, int(agent_iters)]]
+                    
+                    else:
+                        sol_dict[str(grid_size)].append([rule, terrain_target, int(agent_iters)])
+        
+        for key, val in sol_dict.items():
+            for v in val:
+                row = key + "," + v[0] + "," + v[1] + "," + str(v[2]) + "\n"
+                csv.write(row)
+
+    elif args.question == "q23":
+        # game = SearchAndDestroy(dimensions=int(args.grid_dimension),
+        #                         visual=args.visual,
+        #                         rule=args.rule,
+        #                         target_type=None)
+        # agent = Agent(game)
+        # print("Original map\n", game.original_map)
+        # agent.run_game_moving_target(rule_type="normal")
+
+        sol_dict = {}
+        save_file = "q23_analysis.csv"
+        csv = open(save_file, "w")
+        csv.write("Grid Size, Rule Type, Terrain Type, Iterations\n")
+
+        for grid_size in range(5, 50):
+            print("Running for grid size : ", grid_size)
+            for rule in ["belief", "confidence"]:
+                for terrain_target in ["flat", "hill", "forest", "cave"]:
+                    agent_iters = 0
+                    print("Running for Grid Dimension {}, Rule {}, Terrain Type {}".format(grid_size, rule,
+                                                                                           terrain_target))
+                    for iter in range(10):
+                        game = SearchAndDestroy(dimensions=int(args.grid_dimension),
+                                                visual=args.visual,
+                                                rule=args.rule,
+                                                target_type=None)
+                        agent = Agent(game)
+                        # print("Original map\n", game.original_map)
+                        agent_iters += agent.run_game_moving_target(rule_type="normal")
+
+                    agent_iters /= 10
+                    if str(grid_size) not in sol_dict:
+                        sol_dict[str(grid_size)] = [[rule, terrain_target, int(agent_iters)]]
+
+                    else:
+                        sol_dict[str(grid_size)].append([rule, terrain_target, int(agent_iters)])
+
+        for key, val in sol_dict.items():
+            for v in val:
+                row = key + "," + v[0] + "," + v[1] + "," + str(v[2]) + "\n"
+                csv.write(row)
