@@ -529,30 +529,29 @@ if __name__ == "__main__":
         sol_dict = {}
         save_file = "moving_target_analysis.csv"
         csv = open(save_file, "w")
-        csv.write("Grid Size, Rule Type, Terrain Type, Iterations\n")
+        csv.write("Grid Size, Rule Type, Iterations\n")
 
         for grid_size in range(10,12):
             for rule in ["belief", "confidence", "belief with distance", "confidence with distance"]:
-                for terrain_target in ["flat", "hill", "forest", "cave"]:
-                    agent_iters = 0
-                    print("Running for Grid Dimension {}, Rule {}, Terrain Type {}".format(grid_size, rule, terrain_target))
-                    for iter in range(10):
-                        game = SearchAndDestroy(dimensions=grid_size, visual=args.visual, rule=rule, target_type=terrain_target)
-                        agent = Agent(game)
-                        if rule in ["belief", "confidence"]:
-                            agent_iters += agent.run_game_moving_target(rule_type="normal")
+                agent_iters = 0
+                print("Running for Grid Dimension {}, Rule {}".format(grid_size, rule))
+                for iter in range(10):
+                    game = SearchAndDestroy(dimensions=grid_size, visual=args.visual, rule=rule)
+                    agent = Agent(game)
+                    if rule in ["belief", "confidence"]:
+                        agent_iters += agent.run_game_moving_target(rule_type="normal")
 
-                        elif rule in ["belief with distance", "confidence with distance"]:
-                            agent_iters += agent.run_game(rule_type="dist")
-                        
-                    agent_iters /= 10
-                    if str(grid_size) not in sol_dict:
-                        sol_dict[str(grid_size)] = [[rule, terrain_target, int(agent_iters)]]
+                    elif rule in ["belief with distance", "confidence with distance"]:
+                        agent_iters += agent.run_game(rule_type="dist")
                     
-                    else:
-                        sol_dict[str(grid_size)].append([rule, terrain_target, int(agent_iters)])
+                agent_iters /= 10
+                if str(grid_size) not in sol_dict:
+                    sol_dict[str(grid_size)] = [[rule, int(agent_iters)]]
+                
+                else:
+                    sol_dict[str(grid_size)].append([rule, int(agent_iters)])
         
         for key, val in sol_dict.items():
             for v in val:
-                row = key + "," + v[0] + "," + v[1] + "," + str(v[2]) + "\n"
+                row = key + "," + v[0] + "," + str(v[1]) + "\n"
                 csv.write(row)
