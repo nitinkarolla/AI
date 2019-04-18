@@ -12,7 +12,6 @@ import random
 import csv
 
 class SearchAndDestroy():
-
     def __init__(self, dimensions, visual, rule, target_type=None):
         self.dim = dimensions
         self.target = ()
@@ -21,6 +20,7 @@ class SearchAndDestroy():
 
         # Make the target
         self.target_type = target_type
+
         self.target = self.create_target()
         self.visual = visual
         self.rule = rule
@@ -107,14 +107,6 @@ class SearchAndDestroy():
         self.f_ax1.scatter(self.target[0], self.target[1], s=100, c='red', marker='x')
 
 class Agent():
-
-    TerrainMapping = {
-        'flat': 0,
-        'hill': 1,
-        'forest': 2,
-        'caves': 3
-    }
-
     def __init__(self, game):
         self.original_map = game.original_map
         self.dim = len(self.original_map)
@@ -123,6 +115,12 @@ class Agent():
         self.confidence = np.full((self.dim, self.dim), 1/(self.dim**2))
         self.visual = game.visual
         self.heat_map = np.zeros((self.dim, self.dim))
+        self.TerrainMapping = {
+            'flat': 0,
+            'hill': 1,
+            'forest': 2,
+            'caves': 3
+        }
     
         for i in range(self.dim):
             for j in range(self.dim):
@@ -273,50 +271,23 @@ class Agent():
                 type2 = self.false_neg_rate(new_cell[0], new_cell[1])[1] 
                 if type2 != type1:
                     valid.append(new_cell)
-
-        choose = random.randint(1, len(valid)) - 1
+        try:
+            choose = random.randint(1, len(valid)) - 1
+        except AssertionError:
+            assert "Target cannot be moved, run again!"
         new_target = valid[choose]
         type2 = self.false_neg_rate(new_target[0], new_target[1])[1]
         return new_target, type1, type2
 
-    def valid_neighbors(self, x, y, terrain_type):
-        possible_moves = [(0,1), (0,-1), (1,0), (-1,0), (-1,-1), (-1,1), (1,-1), (1,1)]
-        check = False
-        valid = []
-        for moves in possible_moves:
-            new_cell = (x + moves[0], y + moves[1])
-            if new_cell[0] > -1 and new_cell[0] < self.dim and new_cell[1] > -1 and new_cell[1] < self.dim:
-                new_type = self.false_neg_rate(new_cell[0], new_cell[1])[1] 
-                if new_type == terrain_type:
-                    check = True
-                    valid.append(new_type)
-        
-        return check, valid
-
-    def get_neighbors_sum(self, evidence_matrix, type1, type2):
-        n_sum = np.zeros_like(self.belief)
-        for i in range(self.dim):
-            for j in range(self.dim):
-                if evidence_matrix[i][j] != 0:
-                    check, count = self.valid_neighbors(i, j, type2)
-                    if self.false_neg_rate(i, j)[1] == type1 and check:
-                        print(type1, i, j, count)
-                        n_sum[i][j] += len(count)
-                    if self.false_neg_rate(i, j)[1] == type2 and check:
-                        print(type2, i, j, count)
-                        n_sum[i][j] += len(count)
-        
-        return n_sum
-
     def update_belief(self, type1, type2):
         new_belief = self.belief.copy()
-        type1_coords = list(zip(*np.where(game.original_map == self.TerrainMapping[type1])))
-        type2_coords = list(zip(*np.where(game.original_map == self.TerrainMapping[type2])))
+        type1_coords = list(zip(*np.where(self.original_map == self.TerrainMapping[type1])))
+        type2_coords = list(zip(*np.where(self.original_map == self.TerrainMapping[type2])))
 
         # Change belief of the other terrains to 0
         other_types = [type for type in self.TerrainMapping.keys() if type not in [type1, type2]]
-        other_coords_1 = list(zip(*np.where(game.original_map == self.TerrainMapping[other_types[0]])))
-        other_coords_2 = list(zip(*np.where(game.original_map == self.TerrainMapping[other_types[1]])))
+        other_coords_1 = list(zip(*np.where(self.original_map == self.TerrainMapping[other_types[0]])))
+        other_coords_2 = list(zip(*np.where(self.original_map == self.TerrainMapping[other_types[1]])))
         other_coords = other_coords_1 + other_coords_2
         for (r, c) in other_coords:
             new_belief[r, c] = 0
@@ -367,7 +338,7 @@ class Agent():
         self.belief = new_belief
     
     def run_game_moving_target(self, rule_type):
-        game.original_map = np.uint64(game.original_map)
+        self.original_map = np.uint64(game.original_map)
         iterations = 1
         target = self.target_cell
         if rule_type == "normal":
@@ -385,12 +356,11 @@ class Agent():
                     terrain_prob = self.false_neg_rate(current_cell[0], current_cell[1])[0]
                     p = random.uniform(0, 1)
                     if p > terrain_prob:
-                        print("Number of Iterations = ", str(iterations))
+                        # print("Number of Iterations = ", str(iterations))
                         return iterations
                 else:
                     # Update iterations
                     iterations += 1
-                    
                     # Calculate new belief of current cell
                     self.belief[current_cell[0]][current_cell[1]] *= self.false_neg_rate(current_cell[0], current_cell[1])[0]
                     
@@ -401,7 +371,7 @@ class Agent():
                     self.belief = self.belief/belief_sum
 
                     # Target moved to new position
-                    target, type1, type2 = self.target_moves(self.target_cell[0], self.target_cell[1])
+                    target, type1, type2 = self.target_moves(target[0], target[1])
                     self.update_belief(type1, type2)
 
                     # Calculate new confidence based on new belief
@@ -414,9 +384,72 @@ class Agent():
 
                     # Normalize the confidence matrix
                     self.confidence = self.confidence/conf_sum
+                    
+                    if "belief" in game.rule:
+                        current_cell = self.max_prob_cell("belief")
+                    elif "confidence" in game.rule:
+                        current_cell = self.max_prob_cell("confidence")
+        
+        if rule_type == "dist":
+            if "belief" in game.rule:
+                current_cell = self.max_prob_cell("belief")
+            elif "confidence" in game.rule:
+                current_cell = self.max_prob_cell("confidence")
 
-                    current_cell = self.max_prob_cell(rule = game.rule, matrix = self.belief)
+            distance_matrix = np.zeros_like(self.belief)
 
+            while True:
+                self.heat_map[current_cell[0], current_cell[1]] += 1
+                
+                # print("Current cell: {}, Target cell: {}".format(current_cell, self.target_cell))
+                
+                if self.visual:
+                        plt.ion()
+                        plt.show()
+                        plt.pause(1e-15)
+                        game.generate_layout(self.belief, self.confidence, self.heat_map, iterations)
+
+                if current_cell == self.target_cell:
+                    terrain_prob = self.false_neg_rate(current_cell[0], current_cell[1])[0]
+                    p = random.uniform(0, 1)
+                    # print("Terrain FNR: ", terrain_prob, " Probability: ", p)
+                    if p > terrain_prob:
+                        return iterations
+                        # break
+                else:
+                    # Update iterations
+                    iterations += 1
+                    
+                    # Calculate new belief of current cell
+                    self.belief[current_cell[0]][current_cell[1]] *= self.false_neg_rate(current_cell[0], current_cell[1])[0]
+                    # print("New Belief Matrix: \n", self.belief)
+                    
+                    # Sum of the belief matrix
+                    belief_sum = np.sum(self.belief)
+                    # Normalize the belief matrix
+                    self.belief = self.belief/belief_sum
+                    # print("Normalized Belief Matrix: \n", self.belief)
+
+                    # Target moved to new position
+                    target, type1, type2 = self.target_moves(target[0], target[1])
+                    self.update_belief(type1, type2)
+
+                    # Calculate new confidence based on new belief
+                    for i in range(self.dim):
+                        for j in range(self.dim):
+                            self.confidence[i][j] = self.belief[i][j]*(1 - self.false_neg_rate(i, j)[0])
+                    
+                    # Sum of the confidence matrix
+                    conf_sum = np.sum(self.confidence)
+                    # Normalize the confidence matrix
+                    self.confidence = self.confidence/conf_sum
+
+                    distance_matrix = game.get_distance(current_cell[0], current_cell[1])
+                    log_matrix = 1 + np.log(1 + distance_matrix)
+                    if game.rule == "belief":
+                        current_cell = self.max_prob_cell(rule=game.rule, matrix=self.belief/log_matrix)
+                    else:
+                        current_cell = self.max_prob_cell(rule=game.rule, matrix=self.confidence/log_matrix)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Probabilistic models to search and destroy")
@@ -493,10 +526,33 @@ if __name__ == "__main__":
                 csv.write(row)
         
     elif args.question == "q2":
-        game = SearchAndDestroy(dimensions = int(args.grid_dimension),
-                                visual = args.visual,
-                                rule = args.rule,
-                                target_type = None)
-        agent = Agent(game)
-        print("Original map\n", game.original_map)
-        agent.run_game_moving_target(rule_type = "normal")
+        sol_dict = {}
+        save_file = "moving_target_analysis.csv"
+        csv = open(save_file, "w")
+        csv.write("Grid Size, Rule Type, Terrain Type, Iterations\n")
+
+        for grid_size in range(10,12):
+            for rule in ["belief", "confidence", "belief with distance", "confidence with distance"]:
+                for terrain_target in ["flat", "hill", "forest", "cave"]:
+                    agent_iters = 0
+                    print("Running for Grid Dimension {}, Rule {}, Terrain Type {}".format(grid_size, rule, terrain_target))
+                    for iter in range(10):
+                        game = SearchAndDestroy(dimensions=grid_size, visual=args.visual, rule=rule, target_type=terrain_target)
+                        agent = Agent(game)
+                        if rule in ["belief", "confidence"]:
+                            agent_iters += agent.run_game_moving_target(rule_type="normal")
+
+                        elif rule in ["belief with distance", "confidence with distance"]:
+                            agent_iters += agent.run_game(rule_type="dist")
+                        
+                    agent_iters /= 10
+                    if str(grid_size) not in sol_dict:
+                        sol_dict[str(grid_size)] = [[rule, terrain_target, int(agent_iters)]]
+                    
+                    else:
+                        sol_dict[str(grid_size)].append([rule, terrain_target, int(agent_iters)])
+        
+        for key, val in sol_dict.items():
+            for v in val:
+                row = key + "," + v[0] + "," + v[1] + "," + str(v[2]) + "\n"
+                csv.write(row)
