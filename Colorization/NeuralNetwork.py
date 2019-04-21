@@ -1,12 +1,6 @@
 import numpy as np
 import math
 
-
-
-X = np.random.rand(4,3)
-
-y = np.array([1,0,0,1])
-
 class NeuralNetwork():
     
     def __init__(self, X = None , y = None, hiddenLayers = 2, neuronsEachLayer = 2):
@@ -54,10 +48,3 @@ class NeuralNetwork():
                     outputFromCurrLayer.append(self.activationHidden(np.dot(self.weights[i,j],outputFromPrevLayer)))
                 outputFromCurrLayer.append(1.0)
                 outputFromPrevLayer = outputFromCurrLayer.copy()
-
-
-
-if __name__ == "__main__":
-    nn = NeuralNetwork(X, y)
-    nn.weightsInitialisation()
-    print(nn.feedForward([0.97794334, 0.03784321, 0.64579876]))

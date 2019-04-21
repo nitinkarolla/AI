@@ -1,4 +1,6 @@
 from PIL import Image
+import numpy as np
+from Colorization.NeuralNetwork import NeuralNetwork
 
 class Colorizer():
 
@@ -37,3 +39,10 @@ if __name__ == '__main__':
     new_color.extract_pixels()
     new_color.change_color()
     print("Done")
+
+    X = np.random.rand(4, 3)
+    y = np.array([1, 0, 0, 1])
+    NeuralNetwork(X,y)
+    nn = NeuralNetwork(X, y)
+    nn.weightsInitialisation()
+    print(nn.feedForward([0.97794334, 0.03784321, 0.64579876]))
