@@ -29,6 +29,9 @@ class NeuralNetwork():
     def sigmoid(self,x):
         return 1 / (1 + math.exp(-x))
     
+    def squareErrorLoss(self,x,y):
+        return (self.feedForward(x) - y)**2
+    
     def feedForward(self, x):
         x.append(1.0)  
         for i in range(self.hiddenLayers + 1):
