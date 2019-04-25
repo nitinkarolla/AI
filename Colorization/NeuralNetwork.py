@@ -30,21 +30,22 @@ class NeuralNetwork():
         return 1 / (1 + math.exp(-x))
     
     def sigmoid_der(self,x):  
-        return self.sigmoid(x) *(1- self.sigmoid (x))
+        return self.sigmoid(x) *(1 - self.sigmoid (x))
     
     def squareErrorLoss(self,x,y):
         return (self.feedForward(x) - y)**2
 
     def feedForward(self, x):
         x.append(1.0)
-        #out = np.array()
+        self.out = np.array()
         for i in range(self.hiddenLayers + 1):
             outputFromCurrLayer = []
             #For first Layer
             if i == 0:
                 for j in range(self.neuronsEachLayer):
-                    #out.append(outputFromPrevLayer)
-                    outputFromCurrLayer.append(self.activationHidden(np.dot(self.weights[i,j],x)))
+                    z = np.dot(self.weights[i,j],x)
+                    self.out[i,j] = z
+                    outputFromCurrLayer.append(self.activationHidden(z))
                 outputFromCurrLayer.append(1.0)
                 outputFromPrevLayer = outputFromCurrLayer.copy()
                 
@@ -54,8 +55,17 @@ class NeuralNetwork():
             #Rest all Layers
             else:
                 for j in range(self.neuronsEachLayer):
-                    outputFromCurrLayer.append(self.activationHidden(np.dot(self.weights[i,j],outputFromPrevLayer)))
+                    z = np.dot(self.weights[i,j],outputFromPrevLayer)
+                    self.out[i,j] = z
+                    outputFromCurrLayer.append(self.activationHidden(z))
                 outputFromCurrLayer.append(1.0)
                 outputFromPrevLayer = outputFromCurrLayer.copy()
         
 
+
+x = np.random.randint(-50,50,(5,2))
+nn= NeuralNetwork(X= x, y = [1,0,1,0])
+nn.weightsInitialisation()
+#nn.feedForward(x[0])
+#print(nn.out)
+print(nn.weights)
