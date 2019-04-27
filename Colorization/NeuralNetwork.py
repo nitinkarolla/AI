@@ -163,24 +163,24 @@ class NeuralNetwork():
 
 
 ### TESTING ####
-X = np.random.normal(loc = 0, scale = 1, size = (1000,10))
-y = np.random.randint(50, size=1000)
-#nn= NeuralNetwork(epochs= 1000, hiddenLayers= 4, neuronsEachLayer= 20, learning_rate= 0.1)
-#nn.weightsInitialisation()
-#p = nn.feedForward(x[0])
-#print(p)
-#print(nn.weights)
-#print(nn.out)
-#print(nn.x)
-#nn.backProp( p, n = 1, actual= 1.0)
-#print(nn.weights)
-#print(nn.error(x,y))
-from sklearn.datasets import load_iris
-iris = load_iris()
-X = iris.data[:, (2, 3)] 
-y = (iris.target==0).astype(np.int8)
-nn= NeuralNetwork(epochs= 100, method = 'Logistic', hiddenLayers= 4, neuronsEachLayer= 4, learning_rate= 0.0001)
-nn.fit(X,y, X,y)
+# X = np.random.normal(loc = 0, scale = 1, size = (1000,10))
+# y = np.random.randint(50, size=1000)
+# #nn= NeuralNetwork(epochs= 1000, hiddenLayers= 4, neuronsEachLayer= 20, learning_rate= 0.1)
+# #nn.weightsInitialisation()
+# #p = nn.feedForward(x[0])
+# #print(p)
+# #print(nn.weights)
+# #print(nn.out)
+# #print(nn.x)
+# #nn.backProp( p, n = 1, actual= 1.0)
+# #print(nn.weights)
+# #print(nn.error(x,y))
+# from sklearn.datasets import load_iris
+# iris = load_iris()
+# X = iris.data[:, (2, 3)] 
+# y = (iris.target==0).astype(np.int8)
+# nn= NeuralNetwork(epochs= 100, method = 'Logistic', hiddenLayers= 4, neuronsEachLayer= 4, learning_rate= 0.0001)
+# nn.fit(X,y, X,y)
 
 
 
