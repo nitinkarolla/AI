@@ -4,7 +4,8 @@ from statistics import mean
 
 class NeuralNetwork():
     
-    def __init__(self, X = None , y = None, hiddenLayers = 2, neuronsEachLayer = 2, learning_rate = 0.01, epochs = 5, method = 'Linear'):
+    def __init__(self, X = None , y = None, hiddenLayers = 2, neuronsEachLayer = 2, learning_rate = 0.01, 
+                epochs = 5, method = 'Linear', tol = 0.1):
         self.weights = None
         self.activationHidden = self.sigmoid
         if method == 'Linear':
@@ -19,6 +20,7 @@ class NeuralNetwork():
         self.neuronsEachLayer = neuronsEachLayer
         self.learning_rate = learning_rate
         self.epochs = epochs
+        self.tol = tol
 
     def weightsInitialisation(self):
         #Initialising a numpy array of dim(hiddenlayers, neurons) to store weights
@@ -35,13 +37,16 @@ class NeuralNetwork():
         self.outputLayerWeights =  np.random.normal(0,0.5, size = 1 + self.neuronsEachLayer)
     
     def sigmoid(self,x):
-        return 1 / (1 + math.exp(-x))
+        if x < 0:
+            return 1 - 1 / (1 + math.exp(x))
+        else:
+            return 1 / (1 + math.exp(-x))
     
     def linear(self,x):
         return x
     
     def sigmoid_der(self,x):  
-        return self.sigmoid(x) *(1 - self.sigmoid (x))
+        return self.sigmoid(x) *(1 - self.sigmoid(x))
 
     def linear_der(self, x):
         return 1.0
@@ -127,16 +132,31 @@ class NeuralNetwork():
                             temp.append(d)
                     delta.append(temp)
 
-    def fit(self,X,y):
+    def fit(self,X,y,X_val = None, Y_val = None):
         self.X = X
         self.y = y
         self.weightsInitialisation()
         i = 0
+        error_val_old = -1
+        tol_count = 0
         while i < self.epochs:
             for j in range(len(X)):
                 p = self.feedForward(X[j])
                 self.backProp(p,1,y[j])
-            print("Epoch : {} and MSE : {}".format(i, self.error(X,y)))
+            if X_val is not None and Y_val is not None:
+                error_curr_val = self.error(X_val, Y_val)
+                print("Epoch : {} and MSE_Train : {} and MSE_Val : {}".format(i, self.error(X,y), error_curr_val))
+                if abs(error_val_old -error_curr_val) < self.tol :
+                    tol_count = tol_count + 1
+                    error_val_old = error_curr_val
+                    if tol_count >1 :
+                        print("Stopping as validation error did not improve more than tol = {} for 2 iterations".format(self.tol))
+                        break
+                else:
+                    tol_count = 0
+                    error_val_old = error_curr_val
+            else:
+                print("Epoch : {} and MSE : {}".format(i, self.error(X,y)))
             i = i+1
             
 
@@ -145,7 +165,7 @@ class NeuralNetwork():
 ### TESTING ####
 X = np.random.normal(loc = 0, scale = 1, size = (1000,10))
 y = np.random.randint(50, size=1000)
-nn= NeuralNetwork(epochs= 1000, hiddenLayers= 4, neuronsEachLayer= 20, learning_rate= 0.1)
+#nn= NeuralNetwork(epochs= 1000, hiddenLayers= 4, neuronsEachLayer= 20, learning_rate= 0.1)
 #nn.weightsInitialisation()
 #p = nn.feedForward(x[0])
 #print(p)
@@ -155,11 +175,12 @@ nn= NeuralNetwork(epochs= 1000, hiddenLayers= 4, neuronsEachLayer= 20, learning_
 #nn.backProp( p, n = 1, actual= 1.0)
 #print(nn.weights)
 #print(nn.error(x,y))
-#from sklearn.datasets import load_iris
-#iris = load_iris()
-#X = iris.data[:, (2, 3)] 
-#y = (iris.target==0).astype(np.int8)
-nn.fit(X,y)
+from sklearn.datasets import load_iris
+iris = load_iris()
+X = iris.data[:, (2, 3)] 
+y = (iris.target==0).astype(np.int8)
+nn= NeuralNetwork(epochs= 100, method = 'Logistic', hiddenLayers= 4, neuronsEachLayer= 4, learning_rate= 0.0001)
+nn.fit(X,y, X,y)
 
 
 
