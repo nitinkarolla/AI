@@ -5,7 +5,7 @@ from statistics import mean
 class NeuralNetwork():
     
     def __init__(self, X = None , y = None, hiddenLayers = 2, neuronsEachLayer = 2, learning_rate = 0.01, 
-                epochs = 5, method = 'Linear', tol = 0.1):
+                epochs = 5, method = 'Logistic', tol = 0.1):
         self.weights = None
         self.activationHidden = self.sigmoid
         if method == 'Linear':

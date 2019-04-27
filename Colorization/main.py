@@ -148,6 +148,6 @@ if __name__ == '__main__':
 
     # X = np.random.rand(4, 3)
     # y = np.array([1, 0, 0, 1])
-    nn= NeuralNetwork(epochs= 1000, hiddenLayers= 4, neuronsEachLayer= 20, learning_rate= 0.1)
+    nn= NeuralNetwork(epochs= 1000, hiddenLayers= 5, neuronsEachLayer= 20, learning_rate= 0.003)
     nn.fit(X_train, data_y_red)
     # print(nn.feedForward([0.97794334, 0.03784321, 0.64579876]))
