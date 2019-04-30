@@ -8,7 +8,7 @@ from NeuralNetwork import NeuralNetwork
 from sklearn.preprocessing import StandardScaler
 
 class Colorizer():
-    def __init__(self, red_list, blue_list, green_list, image_location='./Images/test/scene9.jpeg'):
+    def __init__(self, red_list, blue_list, green_list, image_location='./Images/test/scene5.jpeg'):
         self.im_size = (0, 0)
         self.image_loc = image_location
         self.image = None
@@ -29,7 +29,7 @@ class Colorizer():
         self.pixel_values = list(self.image.getdata())
         
     def create_image_from_array(self):
-        w, h = 500, 500
+        w, h = 100, 100
         count = 0
         data = np.zeros((h, w, 3), dtype=np.uint8)
         
@@ -81,7 +81,7 @@ class ImageData():
                     if f.split(".")[1] in exts:
                         print("Accessing ", f)
                         image = cv2.imread(os.path.join(root, f))
-                        image = cv2.resize(image, (20,20), interpolation = cv2.INTER_AREA)
+                        image = cv2.resize(image, (100,100), interpolation = cv2.INTER_AREA)
                         # gray image
                         gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
                         # red, green, blue components
@@ -148,6 +148,27 @@ if __name__ == '__main__':
 
     # X = np.random.rand(4, 3)
     # y = np.array([1, 0, 0, 1])
-    nn= NeuralNetwork(epochs= 1000, hiddenLayers= 5, neuronsEachLayer= 20, learning_rate= 0.003)
-    nn.fit(X_train, data_y_red)
-    # print(nn.feedForward([0.97794334, 0.03784321, 0.64579876]))
+    nn_r= NeuralNetwork(epochs= 10, hiddenLayers= 5, neuronsEachLayer= 10, learning_rate= 0.1, tol= 0.0001)
+    nn_g= NeuralNetwork(epochs= 10, hiddenLayers= 5, neuronsEachLayer= 10, learning_rate= 0.1, tol= 0.0001)
+    nn_b= NeuralNetwork(epochs= 10, hiddenLayers= 5, neuronsEachLayer= 10, learning_rate= 0.1, tol= 0.0001)
+
+    nn_r.fit(X_train, data_y_red)
+    nn_g.fit(X_train, data_y_green)
+    nn_b.fit(X_train, data_y_blue)
+
+    directory = "./Images/test"
+    filter_size = 11
+    X, y, files = image_data.get_images(directory, filter_size)
+    print(files)
+    data_X_test, data_y_red_test, data_y_green_test, data_y_blue_test = image_data.align_data(X, y)
+    data_X_test = scaler.transform(data_X_test)
+
+    test_predictions_b = nn_b.predict(data_X_test)
+    test_predictions_g = nn_g.predict(data_X_test)
+    test_predictions_r = nn_r.predict(data_X_test)
+
+    new_color = Colorizer(red_list=test_predictions_r, blue_list=test_predictions_b, green_list=test_predictions_g)
+    new_color.extract_pixels()
+    new_color.create_image_from_array()
+    print("Done")
+    

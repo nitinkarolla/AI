@@ -5,15 +5,17 @@ from statistics import mean
 class NeuralNetwork():
     
     def __init__(self, X = None , y = None, hiddenLayers = 2, neuronsEachLayer = 2, learning_rate = 0.01, 
-                epochs = 5, method = 'Logistic', tol = 0.1):
+                epochs = 5, method = 'Linear', tol = 0.1):
         self.weights = None
         self.activationHidden = self.sigmoid
         if method == 'Linear':
             self.activationOut = self.linear
             self.derivate_out = self.linear_der
+            self.derivate_rest = self.sigmoid_der
         elif method == 'Logistic':
             self.activationOut = self.sigmoid
             self.derivate_out = self.sigmoid_der
+            self.derivate_rest = self.sigmoid_der
         self.X = X
         self.Y = y
         self.hiddenLayers = hiddenLayers
@@ -29,12 +31,12 @@ class NeuralNetwork():
             for j in range(self.neuronsEachLayer):
                 #first hidden layer
                 if i == 0:
-                    self.weights[i,j] = np.random.normal(0,0.5, size = 1 + self.X.shape[1])
+                    self.weights[i,j] = np.random.normal(0,1, size = 1 + self.X.shape[1])
                 #rest hidden layers
                 else:
-                    self.weights[i,j] = np.random.normal(0,0.5, size = 1 + self.neuronsEachLayer)
+                    self.weights[i,j] = np.random.normal(0,1, size = 1 + self.neuronsEachLayer)
         #Weights for the final output layer
-        self.outputLayerWeights =  np.random.normal(0,0.5, size = 1 + self.neuronsEachLayer)
+        self.outputLayerWeights =  np.random.normal(0,1, size = 1 + self.neuronsEachLayer)
     
     def sigmoid(self,x):
         if x < 0:
@@ -94,44 +96,43 @@ class NeuralNetwork():
     def backProp(self, pred, n, actual):
         #Weight updation for Output Layer
         delta = []
+        der_outter_layer = self.derivate_out(np.dot(np.append(self.out[self.hiddenLayers -1], 1.0) , self.outputLayerWeights))
         for i in range(len(self.outputLayerWeights)):
             if i == len(self.outputLayerWeights) - 1:
-                self.outputLayerWeights[i] = self.outputLayerWeights[i] - self.learning_rate * (2.0 / n) * (pred- actual) *self.derivate_out(pred) * 1 
+                self.outputLayerWeights[i] = self.outputLayerWeights[i] - (self.learning_rate * (2.0 / n) * (pred- actual) * 
+                                            der_outter_layer * 1)
             else :
-                d = (2.0 / n) * (pred- actual) * self.derivate_out(pred) * self.out[self.hiddenLayers -1, i]
-                self.outputLayerWeights[i] = self.outputLayerWeights[i] - self.learning_rate * d
-                delta.append(d)
+                d = (2.0 / n) * (pred- actual) * der_outter_layer * self.outputLayerWeights[i]
+                self.outputLayerWeights[i] = self.outputLayerWeights[i] - (self.learning_rate * (2.0 / n) * (pred- actual) * 
+                                            der_outter_layer * self.out[self.hiddenLayers -1, i])
+                delta.append(d) 
         
         #For all other Layers
-        #curr_weights = self.weights.copy()
         for l in reversed(range(self.hiddenLayers)):
-            if np.array(delta).ndim == 1:
-                delta_forward = delta.copy()
-            else:
-                delta_forward = np.array(delta).sum(axis = 0)
-            delta = []
+            delta_forward = delta.copy()
+            delta = [0] * self.neuronsEachLayer
+            #For the first layer
             if l == 0 :
                 for j in range(self.neuronsEachLayer):
-                    #weight = self.weights[l,j].copy()
+                    der_layer = self.derivate_rest(np.dot(self.x , self.weights[l,j]))
                     for i in range(len(self.weights[l,j])):
                         if i == len(self.weights[l,j]) - 1:
-                            self.weights[l,j][i] = self.weights[l,j][i] - self.learning_rate * (1.0 / n) * delta_forward[j] * self.sigmoid_der(self.out[l, j]) * 1.0
+                            self.weights[l,j][i] = self.weights[l,j][i] - self.learning_rate * (1.0 / n) * delta_forward[j] * der_layer * 1.0
                         else :
-                            d = (1.0 / n) * delta_forward[j] * self.sigmoid_der(self.out[l, j]) * self.x[i]
-                            self.weights[l,j][i] = self.weights[l,j][i] - self.learning_rate * d
+                            self.weights[l,j][i] = self.weights[l,j][i] - self.learning_rate * (1.0 / n) * delta_forward[j] * der_layer * self.x[i]
+            #Rest all the layers
             else :
                 for j in range(self.neuronsEachLayer):
-                    #weight = self.weights[l,j].copy()
-                    temp = []
+                    der_layer = self.derivate_rest(np.dot(np.append(self.out[l - 1], 1.0) , self.weights[l,j]))
                     for i in range(len(self.weights[l,j])):
                         if i == len(self.weights[l,j]) - 1:
-                            self.weights[l,j][i] = self.weights[l,j][i] - self.learning_rate * (1.0 / n) * delta_forward[j] * self.sigmoid_der(self.out[l, j]) * 1.0
+                            self.weights[l,j][i] = self.weights[l,j][i] - self.learning_rate * (1.0 / n) * delta_forward[j] * der_layer * 1.0
                         else :
-                            d = (1.0 / n) * delta_forward[j] * self.sigmoid_der(self.out[l, j]) * self.out[l -1, i]
-                            self.weights[l,j][i] = self.weights[l,j][i] - self.learning_rate * d
-                            temp.append(d)
-                    delta.append(temp)
+                            d = (1.0 / n) * delta_forward[j] * der_layer * self.weights[l,j][i]
+                            delta[i] = delta[i] + d
+                            self.weights[l,j][i] = self.weights[l,j][i] - self.learning_rate * delta_forward[j] * der_layer * self.out[l - 1, i]
 
+    
     def fit(self,X,y,X_val = None, Y_val = None):
         self.X = X
         self.y = y
@@ -163,24 +164,39 @@ class NeuralNetwork():
 
 
 ### TESTING ####
-# X = np.random.normal(loc = 0, scale = 1, size = (1000,10))
-# y = np.random.randint(50, size=1000)
-# #nn= NeuralNetwork(epochs= 1000, hiddenLayers= 4, neuronsEachLayer= 20, learning_rate= 0.1)
-# #nn.weightsInitialisation()
-# #p = nn.feedForward(x[0])
-# #print(p)
-# #print(nn.weights)
-# #print(nn.out)
-# #print(nn.x)
-# #nn.backProp( p, n = 1, actual= 1.0)
-# #print(nn.weights)
-# #print(nn.error(x,y))
+#X = np.random.normal(loc = 0, scale = 1, size = (1000,10))
+#y = np.random.randint(50, size=1000)
+#nn= NeuralNetwork(epochs= 1000, hiddenLayers= 4, neuronsEachLayer= 20, learning_rate= 0.1)
+#nn.weightsInitialisation()
+#p = nn.feedForward(x[0])
+#print(p)
+#print(nn.weights)
+#print(nn.out)
+#print(nn.x)
+#nn.backProp( p, n = 1, actual= 1.0)
+#print(nn.weights)
+#print(nn.error(x,y))
 # from sklearn.datasets import load_iris
 # iris = load_iris()
 # X = iris.data[:, (2, 3)] 
 # y = (iris.target==0).astype(np.int8)
-# nn= NeuralNetwork(epochs= 100, method = 'Logistic', hiddenLayers= 4, neuronsEachLayer= 4, learning_rate= 0.0001)
+# nn= NeuralNetwork(epochs= 100, method = 'Logistic', hiddenLayers= 3, neuronsEachLayer= 3, learning_rate= 0.001, tol = 0.0001)
 # nn.fit(X,y, X,y)
+
+
+
+### XOR Data
+
+# X = np.array([[1,1],
+#     [0,0],
+#     [1,0],
+#     [0,1]])
+
+# y = [0,0,1,1]
+# nn= NeuralNetwork(epochs= 10, method = 'Logistic', hiddenLayers= 2, neuronsEachLayer= 2, learning_rate= 0.1, tol = 0.00001)
+# nn.fit(X,y,X,y)
+# print(nn.predict(X))
+
 
 
 
