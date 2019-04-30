@@ -11,7 +11,7 @@ class NeuralNetwork():
 
     def __init__(self,
                  num_hidden_layers = 2,
-                 learning_rate = 0.01,
+                 learning_rate = 0.1,
                  num_neurons_each_layer = None,
                  epochs = 10,
                  weights = None):
@@ -137,7 +137,7 @@ class NeuralNetwork():
                 weight_derivatives[curr_layer][curr_layer_neuron] = first_term * second_term
 
         # Update the weights
-        self.weights -= weight_derivatives
+        self.weights -= self.learning_rate * weight_derivatives
 
     def _forward(self, x):
         out = []
