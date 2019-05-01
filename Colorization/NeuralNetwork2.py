@@ -107,15 +107,13 @@ class NeuralNetwork():
             current_layer_output = np.insert(current_layer_output, obj = 0, values = 1)
             activation_derivatives = activation_derivative(old_weights[next_layer] @ current_layer_output)
 
-            # Calculate the second term of the output derivative. We multiply only those weights which
-            # are at the index of current layer neuron. Also, we remove the bias from the weights.
-            next_layer_weights_without_bias = old_weights[next_layer][:, 1:]
-            second_term = activation_derivatives * next_layer_weights_without_bias
-            print(curr_layer, second_term.shape, first_term.shape, (first_term @ second_term).shape)
-            output_derivatives[curr_layer] = first_term @ second_term
+            for curr_layer_neuron in range(self.num_neurons_each_layer[curr_layer]):
 
-        print(output_derivatives)
-        s
+                # Calculate the second term of the output derivative. We multiply only those weights which
+                # are at the index of current layer neuron. Also, we remove the bias from the weights.
+                next_layer_weights_without_bias = old_weights[next_layer][:, 1:]
+                second_term = activation_derivatives * next_layer_weights_without_bias[:, curr_layer_neuron]
+                output_derivatives[curr_layer][curr_layer_neuron] = first_term @ second_term
 
         # Update the weights using the output derivative calculated above
         for curr_layer in layers_reversed:
