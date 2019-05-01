@@ -150,7 +150,11 @@ if __name__ == '__main__':
 
     # X = np.random.rand(4, 3)
     # y = np.array([1, 0, 0, 1])
-    nn_r= NeuralNetwork(epochs = 20, num_hidden_layers = 3, num_neurons_each_layer = [10, 12, 10], learning_rate = 0.1)
+    nn_r= NeuralNetwork(epochs = 20,
+                        batch_size = 100,
+                        num_hidden_layers = 3,
+                        num_neurons_each_layer = [10, 20, 10],
+                        learning_rate = 0.001)
     # nn_g= NeuralNetwork(epochs= 10, hiddenLayers= 5, neuronsEachLayer= 10, learning_rate= 0.1, tol= 0.0001)
     # nn_b= NeuralNetwork(epochs= 10, hiddenLayers= 5, neuronsEachLayer= 10, learning_rate= 0.1, tol= 0.0001)
     #
