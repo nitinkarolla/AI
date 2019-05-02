@@ -90,9 +90,13 @@ class NeuralNetwork():
                                                      1 + self.num_neurons_each_layer[layer - 1]))
 
         self.weights = np.array(self.weights)
+        self.old_weights = deepcopy(self.weights)
 
-    def _update_weights(self, old_weights, weight_derivatives):
-        self.weights = old_weights - self.learning_rate * weight_derivatives
+    def _update_weights(self):
+        avg_batch_weight_derivatives = np.mean(self.batch_weight_derivatives, axis = 0)
+        self.weights = self.old_weights - self.learning_rate * avg_batch_weight_derivatives
+        self.old_weights = deepcopy(self.weights)
+        self.batch_weight_derivatives = []
 
     def _backward(self, x, y, out):
 
@@ -100,7 +104,6 @@ class NeuralNetwork():
         # weight
         output_derivatives = deepcopy(out)
         weight_derivatives = deepcopy(self.weights)
-        old_weights = deepcopy(self.weights)
 
         # Compute the output derivatives
         layers_reversed = self.layers[::-1]
@@ -122,11 +125,11 @@ class NeuralNetwork():
             # Calculate the activation derivative. Add a 1 for the bias weight
             current_layer_output = out[curr_layer].copy()
             current_layer_output = np.insert(current_layer_output, obj = 0, values = 1)
-            next_layer_activation_derivatives = activation_derivative(old_weights[next_layer] @ current_layer_output)
+            next_layer_activation_derivatives = activation_derivative(self.old_weights[next_layer] @ current_layer_output)
             next_layer_activation_derivatives = next_layer_activation_derivatives.reshape(-1, 1)
 
             # Remove the bias from the weights.
-            next_layer_weights_without_bias = old_weights[next_layer][:, 1:]
+            next_layer_weights_without_bias = self.old_weights[next_layer][:, 1:]
 
             # Multiply each neuron's activation derivative with its weights. This is the Hadmard product
             second_term = next_layer_activation_derivatives * next_layer_weights_without_bias
@@ -155,7 +158,7 @@ class NeuralNetwork():
             curr_layer_output_derivatives = output_derivatives[curr_layer].reshape(-1, 1)
 
             # Get current layer's activation derivatives
-            curr_layer_activation_derivatives = activation_derivative(old_weights[curr_layer] @ previous_layer_output)
+            curr_layer_activation_derivatives = activation_derivative(self.old_weights[curr_layer] @ previous_layer_output)
             curr_layer_activation_derivatives = curr_layer_activation_derivatives.reshape(-1, 1)
 
             # For the current layer multiply each neuron's activation derivatives with all previous layer outputs.
@@ -163,7 +166,8 @@ class NeuralNetwork():
                                             curr_layer_activation_derivatives * previous_layer_output
             weight_derivatives[curr_layer] = curr_layer_weight_derivatives
 
-        return old_weights, weight_derivatives
+        # Append the current data point's weight derivatives in the batch derivatives array
+        self.batch_weight_derivatives.append(weight_derivatives)
 
     def _forward(self, x):
         out = []
@@ -190,21 +194,21 @@ class NeuralNetwork():
         # Add a bias column to X
         X_new = np.column_stack((np.ones(len(X)), X))
 
-        # Initialise arrays to store all weight derivatives of the batch
-        self.batch_weight_derivatives = np.empty(shape = ())
-
         # Initialise the weights of the network
         self._initialise_weights(X_new.shape[1])
 
         for epoch in range(self.epochs):
 
+            # Initialise arrays to store all weight derivatives of the batch
+            self.batch_weight_derivatives = []
+
             # Update weights using mini-batch gradient descent
             for data_index in range(X_new.shape[0]):
                 out = self._forward(X_new[data_index])
-                old_weights, weight_derivatives = self._backward(X_new[data_index], y[data_index], out)
+                self._backward(X_new[data_index], y[data_index], out)
 
-                if data_index % self.batch_size:
-                    self._update_weights(old_weights, weight_derivatives)
+                if (data_index + 1) % self.batch_size == 0:
+                    self._update_weights()
 
             predictions = self.predict(X)
             loss = self._mse_loss(predictions, y)
