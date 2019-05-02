@@ -10,7 +10,7 @@ from NeuralNetwork2 import NeuralNetwork
 from sklearn.preprocessing import StandardScaler
 
 class Colorizer():
-    def __init__(self, red_list, blue_list, green_list, image_location='./Images/test/scene5.jpeg'):
+    def __init__(self, red_list, blue_list, green_list, image_location):
         self.im_size = (0, 0)
         self.image_loc = image_location
         self.image = None
@@ -41,7 +41,7 @@ class Colorizer():
                 count +=1
         
         img = Image.fromarray(data, 'RGB')
-        img.save('my.png')
+        img.save('homemade_scene5_p300_e30_l_3.png')
         img.show()
 
 class ImageData():
@@ -71,7 +71,10 @@ class ImageData():
         
         return X, y
         
-    def get_images(self):
+    def get_images(self, directory = None, data_type=None):
+        if data_type == "test":
+            self.directory = directory
+
         exts = ["jpg", "jpeg", "png"]
         print("Opening directory {}".format(self.directory))
         for root, _, files in os.walk(self.directory):
@@ -139,7 +142,7 @@ class ImageData():
 if __name__ == '__main__':
     # Getting images and returning X, y and file_name lists
     # Use indexes in X, y and file_name to get values for respective images
-    image_data = ImageData(f_s=11, directory="./Images/")
+    image_data = ImageData(f_s=7, directory="./Images/")
     X, y, file_name = image_data.get_images()
     data_X, data_y_red, data_y_green, data_y_blue = image_data.align_data(X, y)
     
@@ -150,31 +153,41 @@ if __name__ == '__main__':
 
     # X = np.random.rand(4, 3)
     # y = np.array([1, 0, 0, 1])
-    nn_r= NeuralNetwork(epochs = 20,
+    nn_r= NeuralNetwork(epochs = 30,
                         batch_size = 100,
                         num_hidden_layers = 3,
                         num_neurons_each_layer = [10, 20, 10],
-                        learning_rate = 0.001)
-    # nn_g= NeuralNetwork(epochs= 10, hiddenLayers= 5, neuronsEachLayer= 10, learning_rate= 0.1, tol= 0.0001)
-    # nn_b= NeuralNetwork(epochs= 10, hiddenLayers= 5, neuronsEachLayer= 10, learning_rate= 0.1, tol= 0.0001)
-    #
+                        learning_rate = 0.003)
+    nn_g= NeuralNetwork(epochs = 30,
+                        batch_size = 100,
+                        num_hidden_layers = 3,
+                        num_neurons_each_layer = [10, 20, 10],
+                        learning_rate = 0.003)
+    nn_b= NeuralNetwork(epochs = 30,
+                        batch_size = 100,
+                        num_hidden_layers = 3,
+                        num_neurons_each_layer = [10, 20, 10],
+                        learning_rate = 0.003)
+    
+    print("Training for red model\n-------------------------")
     nn_r.fit(X_train, data_y_red)
-    # nn_g.fit(X_train, data_y_green)
-    # nn_b.fit(X_train, data_y_blue)
-    #
-    # directory = "./Images/test"
-    # filter_size = 11
-    # X, y, files = image_data.get_images(directory, filter_size)
-    # print(files)
-    # data_X_test, data_y_red_test, data_y_green_test, data_y_blue_test = image_data.align_data(X, y)
-    # data_X_test = scaler.transform(data_X_test)
-    #
-    # test_predictions_b = nn_b.predict(data_X_test)
-    # test_predictions_g = nn_g.predict(data_X_test)
-    # test_predictions_r = nn_r.predict(data_X_test)
-    #
-    # new_color = Colorizer(red_list=test_predictions_r, blue_list=test_predictions_b, green_list=test_predictions_g)
-    # new_color.extract_pixels()
-    # new_color.create_image_from_array()
-    # print("Done")
+    print("-------------------------\nTraining for green model\n-------------------------")
+    nn_g.fit(X_train, data_y_green)
+    print("-------------------------\nTraining for blue model\n-------------------------")
+    nn_b.fit(X_train, data_y_blue)
+    
+    directory = "./Images/test"
+    X, y, files = image_data.get_images(directory, "test")
+    print(files)
+    data_X_test, data_y_red_test, data_y_green_test, data_y_blue_test = image_data.align_data(X, y)
+    data_X_test = scaler.transform(data_X_test)
+    
+    test_predictions_b = nn_b.predict(data_X_test)
+    test_predictions_g = nn_g.predict(data_X_test)
+    test_predictions_r = nn_r.predict(data_X_test)
+    
+    new_color = Colorizer(red_list=test_predictions_r, blue_list=test_predictions_b, green_list=test_predictions_g, image_location='./Images/test/scene5.jpeg')
+    new_color.extract_pixels()
+    new_color.create_image_from_array()
+    print("Done")
     
