@@ -151,8 +151,6 @@ if __name__ == '__main__':
 
     X_train = scaler.transform(data_X)
 
-    # X = np.random.rand(4, 3)
-    # y = np.array([1, 0, 0, 1])
     nn_r= NeuralNetwork(epochs = 30,
                         batch_size = 100,
                         num_hidden_layers = 3,
