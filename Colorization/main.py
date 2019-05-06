@@ -157,7 +157,7 @@ if __name__ == '__main__':
 
     X_train = scaler.transform(data_X)
 
-    TRAINING
+    # TRAINING
     nn_r= NeuralNetwork(epochs = 10,
                         batch_size = 200,
                         num_hidden_layers = 2,
