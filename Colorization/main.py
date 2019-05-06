@@ -147,8 +147,8 @@ class ImageData():
 if __name__ == '__main__':
     # Getting images and returning X, y and file_name lists
     # Use indexes in X, y and file_name to get values for respective images
-    f_s = 7
-    image_data = ImageData(f_s=f_s, directory="./Images/", image_size=300)
+    f_s = 5
+    image_data = ImageData(f_s=f_s, directory="./Images1/", image_size=250)
     X, y, file_name = image_data.get_images()
     data_X, data_y_red, data_y_green, data_y_blue = image_data.align_data(X, y)
     
@@ -157,43 +157,43 @@ if __name__ == '__main__':
 
     X_train = scaler.transform(data_X)
 
-    # # TRAINING
-    # nn_r= NeuralNetwork(epochs = 10,
-    #                     batch_size = 100,
-    #                     num_hidden_layers = 3,
-    #                     num_neurons_each_layer = [10, 20, 10],
-    #                     learning_rate = 0.003)
-    # nn_g= NeuralNetwork(epochs = 10,
-    #                     batch_size = 100,
-    #                     num_hidden_layers = 3,
-    #                     num_neurons_each_layer = [10, 20, 10],
-    #                     learning_rate = 0.003)
-    # nn_b= NeuralNetwork(epochs = 10,
-    #                     batch_size = 100,
-    #                     num_hidden_layers = 3,
-    #                     num_neurons_each_layer = [10, 20, 10],
-    #                     learning_rate = 0.003)
+    TRAINING
+    nn_r= NeuralNetwork(epochs = 10,
+                        batch_size = 200,
+                        num_hidden_layers = 2,
+                        num_neurons_each_layer = [10, 20, 10],
+                        learning_rate = 0.003)
+    nn_g= NeuralNetwork(epochs = 10,
+                        batch_size = 200,
+                        num_hidden_layers = 2,
+                        num_neurons_each_layer = [10, 20, 10],
+                        learning_rate = 0.003)
+    nn_b= NeuralNetwork(epochs = 10,
+                        batch_size = 200,
+                        num_hidden_layers = 2,
+                        num_neurons_each_layer = [10, 20, 10],
+                        learning_rate = 0.003)
     
-    # print("Training for red model\n-------------------------")
-    # nn_r.fit(X_train, data_y_red)
-    # print("-------------------------\nTraining for green model\n-------------------------")
-    # nn_g.fit(X_train, data_y_green)
-    # print("-------------------------\nTraining for blue model\n-------------------------")
-    # nn_b.fit(X_train, data_y_blue)
+    print("Training for red model\n-------------------------")
+    nn_r.fit(X_train, data_y_red)
+    print("-------------------------\nTraining for green model\n-------------------------")
+    nn_g.fit(X_train, data_y_green)
+    print("-------------------------\nTraining for blue model\n-------------------------")
+    nn_b.fit(X_train, data_y_blue)
     
     filename_red = 'finalized_model_red.sav'
-    # pickle.dump(nn_r, open(filename_red, 'wb'))
+    pickle.dump(nn_r, open(filename_red, 'wb'))
     filename_green = 'finalized_model_green.sav'
-    # pickle.dump(nn_g, open(filename_green, 'wb'))
+    pickle.dump(nn_g, open(filename_green, 'wb'))
     filename_blue = 'finalized_model_blue.sav'
-    # pickle.dump(nn_b, open(filename_blue, 'wb'))
+    pickle.dump(nn_b, open(filename_blue, 'wb'))
 
     # TESTING
-    directory = "./Images/test"
-    test_image = './Images/test/scene5.jpeg'
+    directory = "./Images1/test"
+    test_image = './Images1/test/vangogh.jpg'
 
     X_test, y_test, files = image_data.get_images(directory, "test")
-    print(files)
+    print("Test image: ", files)
     data_X_test, data_y_red_test, data_y_green_test, data_y_blue_test = image_data.align_data(X_test, y_test)
     data_X_test = scaler.transform(data_X_test)
     
@@ -209,7 +209,7 @@ if __name__ == '__main__':
                             blue_list=test_predictions_b, 
                             green_list=test_predictions_g, 
                             image_location=test_image, 
-                            result_size=300,
+                            result_size=250,
                             epochs=loaded_model_b.epochs,
                             f_s=f_s
                             )
