@@ -1,7 +1,7 @@
 import numpy as np
 
 
-class CSPAgent():
+class BonusCSPAgent():
 
     def __init__(self, env = None, end_game_on_mine_hit = True):
         self.env = env
@@ -83,6 +83,12 @@ class CSPAgent():
         # from the equations.
         self._check_equations_for_mine_and_non_mine_variables()
 
+        # Check if the number of flags is equal to the total number of mines. If yes, then open all the rest of the cells.
+        if self._check_all_flags_equal_to_mines():
+            self._click_all_closed_cells()
+            self.game_won = True
+            return
+
     def _backtrack(self):
         return
 
@@ -143,6 +149,9 @@ class CSPAgent():
     def _check_solvable_csp(self):
         return (not self.non_mine_variables and not self.mine_variables)
 
+    def _check_all_flags_equal_to_mines(self):
+        return len(list(zip(*np.where(self.env.flags)))) == self.env.number_of_mines
+
     def _click_random_square_with_heuristic(self):
 
         unopened_cells = dict()
@@ -191,6 +200,12 @@ class CSPAgent():
             non_mine_variable = self.non_mine_variables.pop(0)
             self._click_square(non_mine_variable)
 
+    def _click_all_closed_cells(self):
+        not_clicked_cell_coords = list(zip(*np.where(~self.env.clicked)))
+        for (row, column) in not_clicked_cell_coords:
+            cell = self.env.variable_mine_ground_copy[row, column]
+            self._click_square(cell)
+
     def _flag_all_mine_cells(self):
         while(self.mine_variables):
             mine_variable = self.mine_variables.pop(0)
@@ -211,6 +226,12 @@ class CSPAgent():
         # Find more non-mine and mine variables
         self._check_equations_for_mine_and_non_mine_variables()
 
+        # Check if the number of flags is equal to the total number of mines. If yes, then open all the rest of the cells.
+        if self._check_all_flags_equal_to_mines():
+            self._click_all_closed_cells()
+            self.game_won = True
+            return
+
     def get_gameplay_metrics(self):
         metrics = dict()
         metrics["number_of_mines_hit"] = self.env.number_of_mines_hit/self.env.number_of_mines
@@ -226,6 +247,9 @@ class CSPAgent():
 
             # Always see if we can solve the minesweeper using a basic solver
             self._basic_solver()
+
+            if self.game_won:
+                return
 
             # Condition to end the game
             all_flags_equal_to_mines = list(zip(*np.where(self.env.mines))) == list(zip(*np.where(self.env.flags)))
@@ -256,6 +280,9 @@ class CSPAgent():
             # whenever we run out of non-mines and mines
             if self._check_solvable_csp():
                 self._resolve_subsets()
+
+                if self.game_won:
+                    return
 
                  # If everything fails, then click randomly
                 if self._check_solvable_csp():

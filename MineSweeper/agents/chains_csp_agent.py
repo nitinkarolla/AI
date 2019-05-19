@@ -3,14 +3,13 @@ import numpy as np
 
 class CSPAgent():
 
-    def __init__(self, env = None, end_game_on_mine_hit = True):
+    def __init__(self, env=None, end_game_on_mine_hit=True):
         self.env = env
         self.end_game_on_mine_hit = end_game_on_mine_hit
         self.all_constraint_equations = list()
         self.non_mine_variables = list()
         self.mine_variables = list()
         self.game_stuck = False
-        self.game_won = False
 
     def _create_constraint_equation_for_variable(self, variable):
         row = variable.row
@@ -33,7 +32,7 @@ class CSPAgent():
                         continue
 
                     neighbour = self.env.variable_mine_ground_copy[row + i, column + j]
-                    variable.add_constraint_variable(variable = neighbour)
+                    variable.add_constraint_variable(variable=neighbour)
 
         # Append the equation in the global equation list
         self.all_constraint_equations.append([variable.constraint_equation, variable.constraint_value])
@@ -59,7 +58,7 @@ class CSPAgent():
     def _resolve_subsets(self):
 
         # Sort all equations in increasing order of their length
-        self.all_constraint_equations = sorted(self.all_constraint_equations, key = lambda x: len(x[0]))
+        self.all_constraint_equations = sorted(self.all_constraint_equations, key=lambda x: len(x[0]))
 
         # Start resolving subsets
         for equation in self.all_constraint_equations:
@@ -109,24 +108,25 @@ class CSPAgent():
             if len(equation[0]) == equation[1]:
                 self.all_constraint_equations.remove(equation)
                 for mine_variable in equation[0]:
-                    if not self.env.flags[mine_variable.row, mine_variable.column] and mine_variable not in self.mine_variables:
+                    if not self.env.flags[
+                        mine_variable.row, mine_variable.column] and mine_variable not in self.mine_variables:
                         self.mine_variables.append(mine_variable)
 
-    def _remove_variable_from_other_equations(self, variable, is_mine_variable = False):
+    def _remove_variable_from_other_equations(self, variable, is_mine_variable=False):
         for equation in self.all_constraint_equations:
-                if variable in equation[0]:
-                    equation[0].remove(variable)
+            if variable in equation[0]:
+                equation[0].remove(variable)
 
-                    if is_mine_variable and equation[1]:
-                        equation[1] -= 1
+                if is_mine_variable and equation[1]:
+                    equation[1] -= 1
 
     def _add_mine_flag(self, cell):
         self.env.add_mine_flag(cell.row, cell.column)
-        self._remove_variable_from_other_equations(variable = cell, is_mine_variable = True)
+        self._remove_variable_from_other_equations(variable=cell, is_mine_variable=True)
 
     def _open_mine_cell(self, cell):
         self.env.open_mine_cell(cell.row, cell.column)
-        self._remove_variable_from_other_equations(variable = cell, is_mine_variable = True)
+        self._remove_variable_from_other_equations(variable=cell, is_mine_variable=True)
 
     def _click_square(self, cell):
         self.env.click_square(cell.row, cell.column)
@@ -134,11 +134,11 @@ class CSPAgent():
         # If game is over, it means we clicked on a mine. If we dont want to end the game on mine hit
         # then reset the mine_hit variable, open the mine and continue with the game.
         if self.env.mine_hit and not self.end_game_on_mine_hit:
-            self._open_mine_cell(cell = cell)
+            self._open_mine_cell(cell=cell)
             return
 
-        self._create_constraint_equation_for_variable(variable = cell)
-        self._remove_variable_from_other_equations(variable = cell)
+        self._create_constraint_equation_for_variable(variable=cell)
+        self._remove_variable_from_other_equations(variable=cell)
 
     def _check_solvable_csp(self):
         return (not self.non_mine_variables and not self.mine_variables)
@@ -152,13 +152,13 @@ class CSPAgent():
             open_cell = self.env.variable_mine_ground_copy[row, column]
 
             # Get number of open mines
-            number_of_cell_mines_found = open_cell.get_flagged_mines(env = self.env)
+            number_of_cell_mines_found = open_cell.get_flagged_mines(env=self.env)
 
             # Calculate risk for the open cell
             risk = open_cell.value - number_of_cell_mines_found
 
             # Get all the neighbours which are still yet to be opened
-            unopened_cell_neighbours = open_cell.get_unopened_neighbours(env = self.env)
+            unopened_cell_neighbours = open_cell.get_unopened_neighbours(env=self.env)
 
             # Assign the same risk value to each of the neighbours
             for cell_neighbour in unopened_cell_neighbours:
@@ -173,26 +173,16 @@ class CSPAgent():
             return
 
         # Choose the unopened cell with the minimum risk.
-        random_cell = min(unopened_cells, key = unopened_cells.get)
-        self._click_square(random_cell)
-
-    def _click_random_square(self):
-        unopened_cells_coords = list(zip(*np.where(~self.env.clicked)))
-
-        if not unopened_cells_coords:
-            return
-
-        random_cells = [self.env.variable_mine_ground_copy[row, col] for (row, col) in unopened_cells_coords]
-        random_cell = np.random.choice(random_cells)
+        random_cell = min(unopened_cells, key=unopened_cells.get)
         self._click_square(random_cell)
 
     def _click_all_non_mine_cells(self):
-        while(self.non_mine_variables):
+        while (self.non_mine_variables):
             non_mine_variable = self.non_mine_variables.pop(0)
             self._click_square(non_mine_variable)
 
     def _flag_all_mine_cells(self):
-        while(self.mine_variables):
+        while (self.mine_variables):
             mine_variable = self.mine_variables.pop(0)
             self._add_mine_flag(mine_variable)
 
@@ -213,16 +203,19 @@ class CSPAgent():
 
     def get_gameplay_metrics(self):
         metrics = dict()
-        metrics["number_of_mines_hit"] = self.env.number_of_mines_hit/self.env.number_of_mines
-        metrics["number_of_mines_flagged_correctly"] = len(list(zip(*np.where(self.env.mines & self.env.flags.astype(bool) & ~self.env.mine_revealed))))
-        metrics["number_of_cells_flagged_incorrectly"] = len(list(zip(*np.where(~self.env.mines & self.env.flags.astype(bool)))))
-        metrics["final_score"] = metrics["number_of_mines_flagged_correctly"]/self.env.number_of_mines
+        metrics["number_of_mines_hit"] = self.env.number_of_mines_hit
+        metrics["number_of_mines_flagged_correctly"] = len(
+            list(zip(*np.where(self.env.mines & self.env.flags.astype(bool)))))
+        metrics["number_of_cells_flagged_incorrectly"] = len(
+            list(zip(*np.where(~self.env.mines & self.env.flags.astype(bool)))))
+        metrics["game_stuck"] = self.game_stuck
+        metrics["game_won"] = self.game_won
         return metrics
 
     def play(self):
 
         self.non_mine_variables.append(self.env.variable_mine_ground_copy[0, 0])
-        while(True):
+        while (True):
 
             # Always see if we can solve the minesweeper using a basic solver
             self._basic_solver()
@@ -232,10 +225,10 @@ class CSPAgent():
             all_clicked = np.all(self.env.clicked)
 
             # If we are stuck at a game position, where no new moves can be made
-            # then we just click randomly.
+            # then we lost.
             if self.game_stuck:
-                self.game_stuck = False
-                self._click_random_square()
+                self.game_won = False
+                return
 
             # If we hit a mine, then we lost the game
             if self.env.mine_hit:
@@ -257,6 +250,6 @@ class CSPAgent():
             if self._check_solvable_csp():
                 self._resolve_subsets()
 
-                 # If everything fails, then click randomly
+                # If everything fails, then click randomly
                 if self._check_solvable_csp():
                     self._click_random_square_with_heuristic()

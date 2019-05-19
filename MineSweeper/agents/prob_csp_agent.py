@@ -1,20 +1,28 @@
 import numpy as np
 
 
-class CSPAgent():
+class ProbCSPAgent():
 
-    def __init__(self, env = None, end_game_on_mine_hit = True):
+    def __init__(self, env = None, end_game_on_mine_hit = True, prob = 0, use_probability_agent = False):
         self.env = env
         self.end_game_on_mine_hit = end_game_on_mine_hit
         self.all_constraint_equations = list()
         self.non_mine_variables = list()
         self.mine_variables = list()
+        self.prob = prob
         self.game_stuck = False
-        self.game_won = False
+        self.use_probability_agent = use_probability_agent
 
     def _create_constraint_equation_for_variable(self, variable):
         row = variable.row
         column = variable.column
+
+        p = np.random.binomial(1, self.prob)
+        if p == 0:
+            self.env.mine_ground_copy[row, column] = None
+            self.env.clicked_and_not_revealed[row, column] = True
+            return
+        
         for i in [-1, 0, 1]:
             for j in [-1, 0, 1]:
                 if (i == 0 and j == 0):
@@ -146,7 +154,7 @@ class CSPAgent():
     def _click_random_square_with_heuristic(self):
 
         unopened_cells = dict()
-        open_cell_coords = list(zip(*np.where(self.env.opened)))
+        open_cell_coords = list(zip(*np.where(self.env.opened & ~self.env.clicked_and_not_revealed)))
 
         for row, column in open_cell_coords:
             open_cell = self.env.variable_mine_ground_copy[row, column]
@@ -158,7 +166,8 @@ class CSPAgent():
             risk = open_cell.value - number_of_cell_mines_found
 
             # Get all the neighbours which are still yet to be opened
-            unopened_cell_neighbours = open_cell.get_unopened_neighbours(env = self.env)
+            unopened_cell_neighbours = open_cell.get_unopened_neighbours(env = self.env,
+                                                                         use_probability_agent = self.use_probability_agent)
 
             # Assign the same risk value to each of the neighbours
             for cell_neighbour in unopened_cell_neighbours:
@@ -213,10 +222,11 @@ class CSPAgent():
 
     def get_gameplay_metrics(self):
         metrics = dict()
-        metrics["number_of_mines_hit"] = self.env.number_of_mines_hit/self.env.number_of_mines
-        metrics["number_of_mines_flagged_correctly"] = len(list(zip(*np.where(self.env.mines & self.env.flags.astype(bool) & ~self.env.mine_revealed))))
+        metrics["number_of_mines_hit"] = self.env.number_of_mines_hit
+        metrics["number_of_mines_flagged_correctly"] = len(list(zip(*np.where(self.env.mines & self.env.flags.astype(bool)))))
         metrics["number_of_cells_flagged_incorrectly"] = len(list(zip(*np.where(~self.env.mines & self.env.flags.astype(bool)))))
-        metrics["final_score"] = metrics["number_of_mines_flagged_correctly"]/self.env.number_of_mines
+        metrics["game_stuck"] = self.game_stuck
+        metrics["game_won"] = self.game_won
         return metrics
 
     def play(self):
@@ -256,7 +266,7 @@ class CSPAgent():
             # whenever we run out of non-mines and mines
             if self._check_solvable_csp():
                 self._resolve_subsets()
-
+                    
                  # If everything fails, then click randomly
                 if self._check_solvable_csp():
                     self._click_random_square_with_heuristic()
