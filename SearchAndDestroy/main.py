@@ -51,9 +51,9 @@ class SearchAndDestroy():
                     mat[i][j] = 1
                 elif p > 0.5 and p <= 0.8:
                     mat[i][j] = 2
-                else: 
+                else:
                     mat[i][j] = 3
-        
+
         return mat
 
     def create_target(self):
@@ -64,7 +64,7 @@ class SearchAndDestroy():
 
         elif self.target_type == "flat":
             indices = np.where(self.original_map == 0)
-           
+
         elif self.target_type == "hill":
             indices = np.where(self.original_map == 1)
 
@@ -121,7 +121,7 @@ class Agent():
             'forest': 2,
             'caves': 3
         }
-    
+
         for i in range(self.dim):
             for j in range(self.dim):
                 self.confidence[i][j] *= (1 - self.false_neg_rate(i, j)[0])
@@ -164,9 +164,9 @@ class Agent():
             while True:
                 current_cell = self.max_prob_cell(game.rule)
                 self.heat_map[current_cell[0], current_cell[1]] += 1
-                
+
                 # print("Current cell: {}, Target cell: {}".format(current_cell, self.target_cell))
-                
+
                 if self.visual:
                         plt.ion()
                         plt.show()
@@ -183,11 +183,11 @@ class Agent():
                 else:
                     # Update iterations
                     iterations += 1
-                    
+
                     # Calculate new belief of current cell
                     self.belief[current_cell[0]][current_cell[1]] *= self.false_neg_rate(current_cell[0], current_cell[1])[0]
                     # print("New Belief Matrix: \n", self.belief)
-                    
+
                     # Sum of the belief matrix
                     belief_sum = np.sum(self.belief)
                     # Normalize the belief matrix
@@ -198,12 +198,12 @@ class Agent():
                     for i in range(self.dim):
                         for j in range(self.dim):
                             self.confidence[i][j] = self.belief[i][j]*(1 - self.false_neg_rate(i, j)[0])
-                    
+
                     # Sum of the confidence matrix
                     conf_sum = np.sum(self.confidence)
                     # Normalize the confidence matrix
                     self.confidence = self.confidence/conf_sum
-        
+
         if rule_type == "dist":
             if "belief" in game.rule:
                 current_cell = self.max_prob_cell("belief")
@@ -214,9 +214,9 @@ class Agent():
 
             while True:
                 self.heat_map[current_cell[0], current_cell[1]] += 1
-                
+
                 # print("Current cell: {}, Target cell: {}".format(current_cell, self.target_cell))
-                
+
                 if self.visual:
                         plt.ion()
                         plt.show()
@@ -233,11 +233,11 @@ class Agent():
                 else:
                     # Update iterations
                     iterations += 1
-                    
+
                     # Calculate new belief of current cell
                     self.belief[current_cell[0]][current_cell[1]] *= self.false_neg_rate(current_cell[0], current_cell[1])[0]
                     # print("New Belief Matrix: \n", self.belief)
-                    
+
                     # Sum of the belief matrix
                     belief_sum = np.sum(self.belief)
                     # Normalize the belief matrix
@@ -248,7 +248,7 @@ class Agent():
                     for i in range(self.dim):
                         for j in range(self.dim):
                             self.confidence[i][j] = self.belief[i][j]*(1 - self.false_neg_rate(i, j)[0])
-                    
+
                     # Sum of the confidence matrix
                     conf_sum = np.sum(self.confidence)
                     # Normalize the confidence matrix
@@ -268,7 +268,7 @@ class Agent():
         for moves in possible_moves:
             new_cell = (x + moves[0], y + moves[1])
             if new_cell[0] > -1 and new_cell[0] < self.dim and new_cell[1] > -1 and new_cell[1] < self.dim:
-                type2 = self.false_neg_rate(new_cell[0], new_cell[1])[1] 
+                type2 = self.false_neg_rate(new_cell[0], new_cell[1])[1]
                 if type2 != type1:
                     valid.append(new_cell)
         try:
@@ -336,7 +336,7 @@ class Agent():
         sum = new_belief.sum()
         new_belief /= sum
         self.belief = new_belief
-    
+
     def run_game_moving_target(self, rule_type):
         self.original_map = np.uint64(game.original_map)
         iterations = 1
@@ -363,7 +363,7 @@ class Agent():
                     iterations += 1
                     # Calculate new belief of current cell
                     self.belief[current_cell[0]][current_cell[1]] *= self.false_neg_rate(current_cell[0], current_cell[1])[0]
-                    
+
                     # Sum of the belief matrix
                     belief_sum = np.sum(self.belief)
 
@@ -378,18 +378,18 @@ class Agent():
                     for i in range(self.dim):
                         for j in range(self.dim):
                             self.confidence[i][j] = self.belief[i][j]*(1 - self.false_neg_rate(i, j)[0])
-                    
+
                     # Sum of the confidence matrix
                     conf_sum = np.sum(self.confidence)
 
                     # Normalize the confidence matrix
                     self.confidence = self.confidence/conf_sum
-                    
+
                     if "belief" in game.rule:
                         current_cell = self.max_prob_cell("belief")
                     elif "confidence" in game.rule:
                         current_cell = self.max_prob_cell("confidence")
-        
+
         if rule_type == "dist":
             if "belief" in game.rule:
                 current_cell = self.max_prob_cell("belief")
@@ -400,9 +400,9 @@ class Agent():
 
             while True:
                 self.heat_map[current_cell[0], current_cell[1]] += 1
-                
+
                 # print("Current cell: {}, Target cell: {}".format(current_cell, self.target_cell))
-                
+
                 if self.visual:
                         plt.ion()
                         plt.show()
@@ -419,11 +419,11 @@ class Agent():
                 else:
                     # Update iterations
                     iterations += 1
-                    
+
                     # Calculate new belief of current cell
                     self.belief[current_cell[0]][current_cell[1]] *= self.false_neg_rate(current_cell[0], current_cell[1])[0]
                     # print("New Belief Matrix: \n", self.belief)
-                    
+
                     # Sum of the belief matrix
                     belief_sum = np.sum(self.belief)
                     # Normalize the belief matrix
@@ -438,7 +438,7 @@ class Agent():
                     for i in range(self.dim):
                         for j in range(self.dim):
                             self.confidence[i][j] = self.belief[i][j]*(1 - self.false_neg_rate(i, j)[0])
-                    
+
                     # Sum of the confidence matrix
                     conf_sum = np.sum(self.confidence)
                     # Normalize the confidence matrix
@@ -470,7 +470,7 @@ if __name__ == "__main__":
         save_file = "q3_analysis.csv"
         csv = open(save_file, "w")
         csv.write("Grid Size, Rule Type, Terrain Type, Iterations\n")
-        
+
         for grid_size in range(5, 50):
             for rule in ["belief", "confidence"]:
                 for terrain_target in ["flat", "hill", "forest", "cave"]:
@@ -484,10 +484,10 @@ if __name__ == "__main__":
                     agent_iters /= 10
                     if str(grid_size) not in sol_dict:
                         sol_dict[str(grid_size)] = [[rule, terrain_target, int(agent_iters)]]
-                    
+
                     else:
                         sol_dict[str(grid_size)].append([rule, terrain_target, int(agent_iters)])
-        
+
         for key, val in sol_dict.items():
             for v in val:
                 row = key + "," + v[0] + "," + v[1] + "," + str(v[2]) + "\n"
@@ -498,7 +498,7 @@ if __name__ == "__main__":
         save_file = "q4_analysis.csv"
         csv = open(save_file, "w")
         csv.write("Grid Size, Rule Type, Terrain Type, Iterations\n")
-        
+
         for grid_size in range(5, 50):
             for rule in ["belief", "confidence", "belief with distance", "confidence with distance"]:
                 for terrain_target in ["flat", "hill", "forest", "cave"]:
@@ -511,34 +511,33 @@ if __name__ == "__main__":
                             agent_iters += agent.run_game(rule_type="normal")
 
                         elif rule in ["belief with distance", "confidence with distance"]:
-                            agent_iters += agent.run_game(rule_type="dist")    
+                            agent_iters += agent.run_game(rule_type="dist")
 
                     agent_iters /= 10
                     if str(grid_size) not in sol_dict:
                         sol_dict[str(grid_size)] = [[rule, terrain_target, int(agent_iters)]]
-                    
+
                     else:
                         sol_dict[str(grid_size)].append([rule, terrain_target, int(agent_iters)])
-        
+
         for key, val in sol_dict.items():
             for v in val:
                 row = key + "," + v[0] + "," + v[1] + "," + str(v[2]) + "\n"
                 csv.write(row)
-        
+
     elif args.question == "q2":
         sol_dict = {}
-<<<<<<< HEAD
         save_file = "q24_analysis.csv"
         csv = open(save_file, "w")
         csv.write("Grid Size, Rule Type, Terrain Type, Iterations\n")
-        
+
         for grid_size in range(5, 50):
             for rule in ["belief", "confidence", "belief with distance", "confidence with distance"]:
                 for terrain_target in ["flat", "hill", "forest", "cave"]:
                     agent_iters = 0
                     print("Running for Grid Dimension {}, Rule {}, Terrain Type {}".format(grid_size, rule, terrain_target))
                     for iter in range(10):
-                        
+
                         game = SearchAndDestroy(dimensions = int(args.grid_dimension),
                                 visual = args.visual,
                                 rule = args.rule,
@@ -549,15 +548,15 @@ if __name__ == "__main__":
                             agent_iters += agent.run_game_moving_target(rule_type = "normal")
 
                         elif rule in ["belief with distance", "confidence with distance"]:
-                            agent_iters += agent.run_game_moving_target(rule_type="dist")    
+                            agent_iters += agent.run_game_moving_target(rule_type="dist")
 
                     agent_iters /= 10
                     if str(grid_size) not in sol_dict:
                         sol_dict[str(grid_size)] = [[rule, terrain_target, int(agent_iters)]]
-                    
+
                     else:
                         sol_dict[str(grid_size)].append([rule, terrain_target, int(agent_iters)])
-        
+
         for key, val in sol_dict.items():
             for v in val:
                 row = key + "," + v[0] + "," + v[1] + "," + str(v[2]) + "\n"
@@ -604,33 +603,3 @@ if __name__ == "__main__":
             for v in val:
                 row = key + "," + v[0] + "," + v[1] + "," + str(v[2]) + "\n"
                 csv.write(row)
-=======
-        save_file = "moving_target_analysis.csv"
-        csv = open(save_file, "w")
-        csv.write("Grid Size, Rule Type, Iterations\n")
-
-        for grid_size in range(10,12):
-            for rule in ["belief", "confidence", "belief with distance", "confidence with distance"]:
-                agent_iters = 0
-                print("Running for Grid Dimension {}, Rule {}".format(grid_size, rule))
-                for iter in range(10):
-                    game = SearchAndDestroy(dimensions=grid_size, visual=args.visual, rule=rule)
-                    agent = Agent(game)
-                    if rule in ["belief", "confidence"]:
-                        agent_iters += agent.run_game_moving_target(rule_type="normal")
-
-                    elif rule in ["belief with distance", "confidence with distance"]:
-                        agent_iters += agent.run_game(rule_type="dist")
-                    
-                agent_iters /= 10
-                if str(grid_size) not in sol_dict:
-                    sol_dict[str(grid_size)] = [[rule, int(agent_iters)]]
-                
-                else:
-                    sol_dict[str(grid_size)].append([rule, int(agent_iters)])
-        
-        for key, val in sol_dict.items():
-            for v in val:
-                row = key + "," + v[0] + "," + str(v[1]) + "\n"
-                csv.write(row)
->>>>>>> 6da6d397517bde9a4fcf022dc4377926179361fd
